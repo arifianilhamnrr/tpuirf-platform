@@ -211,18 +211,18 @@
                         'glassmorphism' => 'bg-white/30 backdrop-blur-xl border border-white/60 shadow-xl',
                         'neumorphism' => 'bg-slate-200 border-0 shadow-[10px_10px_24px_#b8c0cc,-10px_-10px_24px_#ffffff]',
                         'material_elevated' => 'bg-white border-0 shadow-xl',
-                        'high_contrast_brutalist' => 'bg-yellow-300 border-4 border-black shadow-[7px_7px_0_#000]',
+                         'high_contrast_brutalist' => 'tpuirf-palette-accent border-4 border-black shadow-[7px_7px_0_#000]',
                         default => 'bg-white border-2 border-slate-200 shadow-none',
                     };
-                    $buttonStyle = $option === 'high_contrast_brutalist' ? 'bg-black text-white border-2 border-black rounded-none' : ($option === 'neumorphism' ? 'bg-slate-200 text-indigo-700 shadow-[inset_3px_3px_6px_#b8c0cc,inset_-3px_-3px_6px_#ffffff]' : 'bg-indigo-600 text-white');
+                    $buttonStyle = $option === 'high_contrast_brutalist' ? 'bg-black text-white border-2 border-black rounded-none' : ($option === 'neumorphism' ? 'bg-slate-200 tpuirf-palette-primary-text shadow-[inset_3px_3px_6px_#b8c0cc,inset_-3px_-3px_6px_#ffffff]' : 'tpuirf-palette-primary text-white');
                 @endphp
                 <section class="rounded-3xl border-2 overflow-hidden bg-white/70 dark:bg-gray-800/60 transition" :class="isStyleSelected('{{ $option }}') ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-gray-200 dark:border-gray-700'">
                     <button type="button" class="w-full flex items-center justify-between gap-4 p-5 text-left" @click="togglePreview('{{ $option }}')" data-track-component="design-{{ $option }}-accordion" data-option-id="{{ $option }}" :aria-expanded="expandedStyle === '{{ $option }}'">
                         <div><h2 class="font-bold text-gray-900 dark:text-white">{{ $labels[$option] }}</h2><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $descriptions[$option] }}</p></div>
                         <span class="text-2xl" x-text="expandedStyle === '{{ $option }}' ? '−' : '+'"></span>
                     </button>
-                    <div x-show="expandedStyle === '{{ $option }}'" x-cloak class="p-4 sm:p-7" :class="previewBackgroundClass()">
-                        <div class="overflow-hidden" :class="[compactSurfaceClass('{{ $option }}'), combinedFontClass(), combinedFontSizeClass()]" data-track-component="design-{{ $option }}-live-preview" data-option-id="{{ $option }}">
+                    <div x-show="expandedStyle === '{{ $option }}'" x-cloak class="p-4 sm:p-7" :style="paletteVariables()" :class="previewBackgroundClass('{{ $option }}')">
+                        <div class="overflow-hidden" :style="paletteVariables()" :class="[compactSurfaceClass('{{ $option }}'), combinedFontClass(), combinedFontSizeClass()]" data-track-component="design-{{ $option }}-live-preview" data-option-id="{{ $option }}">
                             <div x-show="combinedPreferences.navigation_position === 'top'" class="px-5 py-3 flex items-center justify-between" :class="compactNavigationClass('{{ $option }}')"><strong>Ruang Kerja</strong><span class="text-xs">Beranda · Proyek · Aktivitas</span></div>
                             <div class="flex" :class="combinedPreferences.navigation_position === 'left' ? '' : 'flex-col'">
                                 <div x-show="combinedPreferences.navigation_position === 'left'" class="w-24 shrink-0 p-3 space-y-5 text-center text-xs" :class="compactNavigationClass('{{ $option }}')"><strong>Ruang Kerja</strong><p>Beranda</p><p>Proyek</p><p>Aktivitas</p></div>
@@ -254,7 +254,7 @@
             </div>
         </section>
 
-        <div x-show="fullscreenStyle" x-cloak class="fixed inset-0 z-[100] overflow-y-auto" :class="[fullscreenBackgroundClass(), combinedFontClass(), combinedFontSizeClass()]" role="dialog" aria-modal="true" @keydown.escape.window="demoModal ? demoModal = null : closeFullscreen()">
+        <div x-show="fullscreenStyle" x-cloak class="fixed inset-0 z-[100] overflow-y-auto" :style="paletteVariables()" :class="[fullscreenBackgroundClass(), combinedFontClass(), combinedFontSizeClass()]" role="dialog" aria-modal="true" @keydown.escape.window="demoModal ? demoModal = null : closeFullscreen()">
             <div class="relative min-h-full flex" :class="combinedPreferences.navigation_position === 'left' ? '' : 'flex-col'">
                 <header class="sticky top-0 z-30 min-h-18" :class="fullscreenNavigationClass()">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
@@ -326,6 +326,21 @@
     <p x-show="errorMessage" x-text="errorMessage" class="mt-3 text-center text-sm text-red-600"></p>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .tpuirf-palette-bg { background-color: var(--palette-background); }
+    .tpuirf-palette-deep { background-color: var(--palette-deep); }
+    .tpuirf-palette-soft { background-color: var(--palette-soft); }
+    .tpuirf-palette-primary { background-color: var(--palette-primary); }
+    .tpuirf-palette-accent { background-color: var(--palette-accent); }
+    .tpuirf-palette-primary-text { color: var(--palette-primary); }
+    .tpuirf-palette-deep-text { color: var(--palette-deep); }
+    .tpuirf-palette-primary:hover { background-color: var(--palette-accent); }
+    .tpuirf-palette-soft:hover { background-color: var(--palette-background); }
+    .tpuirf-palette-primary-text:hover { color: var(--palette-accent); }
+</style>
+@endpush
 
 @push('scripts')
 <script>
@@ -819,15 +834,36 @@ function researchPreferenceTask(config) {
             return `fa-fw ${baseClass}`;
         },
         demoIcon(item) { return { Beranda: 'fa-compass', Proyek: 'fa-folder', Aktivitas: 'fa-clock', Profil: 'fa-user' }[item] || 'fa-circle'; },
-        previewBackgroundClass() { return this.combinedPreferences.theme === 'dark' ? 'bg-slate-950' : 'bg-gradient-to-br from-indigo-100 via-cyan-50 to-purple-100'; },
+        paletteVariables() {
+            const palettes = {
+                blue: { primary: '#2563eb', accent: '#06b6d4', soft: '#dbeafe', background: '#eff6ff', deep: '#172554' },
+                green: { primary: '#059669', accent: '#14b8a6', soft: '#d1fae5', background: '#ecfdf5', deep: '#064e3b' },
+                purple: { primary: '#7c3aed', accent: '#d946ef', soft: '#ede9fe', background: '#faf5ff', deep: '#581c87' },
+                orange: { primary: '#ea580c', accent: '#f59e0b', soft: '#ffedd5', background: '#fff7ed', deep: '#7c2d12' },
+                rose: { primary: '#e11d48', accent: '#ec4899', soft: '#ffe4e6', background: '#fff1f2', deep: '#881337' },
+                neutral: { primary: '#475569', accent: '#64748b', soft: '#e2e8f0', background: '#f8fafc', deep: '#1e293b' },
+            };
+            const palette = palettes[this.selectedPalette || this.combinedPreferences.color_palette] || palettes.blue;
+            return {
+                '--palette-primary': palette.primary,
+                '--palette-accent': palette.accent,
+                '--palette-soft': palette.soft,
+                '--palette-background': palette.background,
+                '--palette-deep': palette.deep,
+            };
+        },
+        previewBackgroundClass(style = null) {
+            if (style === 'high_contrast_brutalist') return this.combinedPreferences.theme === 'dark' ? 'bg-slate-900' : 'bg-stone-200';
+            return 'tpuirf-palette-bg';
+        },
         compactSurfaceClass(style, nested = false) {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
                 glassmorphism: dark ? 'rounded-2xl bg-gradient-to-b from-white/10 to-white/5 text-white backdrop-blur-3xl backdrop-saturate-150 border border-white/10 border-t-white/30 border-l-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'rounded-2xl bg-gradient-to-b from-white/60 to-white/30 text-slate-900 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 border-t-white border-l-white shadow-[0_8px_32px_rgba(31,38,135,0.1)]',
                 neumorphism: dark ? `rounded-2xl bg-slate-800 text-slate-100 border-0 ${nested ? 'shadow-[inset_5px_5px_10px_#0f172a,inset_-5px_-5px_10px_#334155]' : 'shadow-[10px_10px_22px_#0f172a,-10px_-10px_22px_#334155]'}` : `rounded-2xl bg-slate-200 text-slate-900 border-0 ${nested ? 'shadow-[inset_5px_5px_10px_#b8c0cc,inset_-5px_-5px_10px_#ffffff]' : 'shadow-[10px_10px_24px_#b8c0cc,-10px_-10px_24px_#ffffff]'}`,
-                material_elevated: dark ? 'rounded-2xl bg-slate-800 text-slate-100 shadow-xl' : 'rounded-2xl bg-white text-slate-900 shadow-xl',
+                material_elevated: dark ? 'rounded-2xl tpuirf-palette-deep text-slate-100 shadow-xl' : 'rounded-2xl tpuirf-palette-bg text-slate-900 shadow-xl',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[7px_7px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[7px_7px_0_#94a3b8]',
-                minimal_flat: dark ? 'rounded-lg bg-slate-900 text-slate-100 border-2 border-slate-700' : 'rounded-lg bg-white text-slate-900 border-2 border-slate-300',
+                minimal_flat: dark ? 'rounded-lg tpuirf-palette-deep text-slate-100 border-2 border-slate-700' : 'rounded-lg tpuirf-palette-bg text-slate-900 border-2 border-slate-300',
             }[style] || 'rounded-2xl bg-white text-slate-900';
         },
         compactNavigationClass(style) {
@@ -836,23 +872,23 @@ function researchPreferenceTask(config) {
                 glassmorphism: dark ? 'bg-white/5 text-white backdrop-blur-3xl backdrop-saturate-150 border-b border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.3)]' : 'bg-white/40 text-slate-900 backdrop-blur-3xl backdrop-saturate-150 border-b border-white/80 shadow-[0_4px_16px_rgba(31,38,135,0.05)]',
                 neumorphism: dark ? 'bg-slate-800 text-slate-100 shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155]' : 'bg-slate-200 text-slate-900 shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff]',
                 material_elevated: dark ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-900 shadow-lg',
-                high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-b-4 border-black' : 'bg-blue-200 text-slate-900 border-b-4 border-slate-900',
+                high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-b-4 border-black' : 'bg-stone-100 text-slate-900 border-b-4 border-slate-900',
                 minimal_flat: dark ? 'bg-slate-900 text-white border-b-2 border-slate-700' : 'bg-white text-slate-900 border-b-2 border-slate-300',
-            }[style] || 'bg-indigo-600 text-white';
+            }[style] || 'tpuirf-palette-primary text-white';
         },
         compactButtonClass(style, primary) {
             const dark = this.combinedPreferences.theme === 'dark';
-            if (style === 'glassmorphism') return primary ? 'rounded-xl bg-gradient-to-br from-indigo-500/80 to-purple-500/80 text-white backdrop-blur-md border border-white/30 shadow-[0_4px_12px_rgba(99,102,241,0.3)] hover:from-indigo-400/90 hover:to-purple-400/90 hover:shadow-[0_6px_16px_rgba(99,102,241,0.4)] transition-all' : 'rounded-xl bg-white/20 text-current backdrop-blur-md border border-white/50 border-t-white/80 hover:bg-white/40 hover:shadow-[0_4px_12px_rgba(31,38,135,0.1)] transition-all';
+            if (style === 'glassmorphism') return primary ? 'rounded-xl tpuirf-palette-primary text-white backdrop-blur-md border border-white/30 shadow-lg transition-all' : 'rounded-xl bg-white/20 text-current backdrop-blur-md border border-white/50 border-t-white/80 hover:bg-white/40 hover:shadow-lg transition-all';
             if (style === 'neumorphism') return dark ? `rounded-xl bg-slate-800 text-indigo-400 transition-all duration-300 ${primary ? 'shadow-[6px_6px_12px_#0f172a,-6px_-6px_12px_#334155] hover:shadow-[2px_2px_4px_#0f172a,-2px_-2px_4px_#334155] hover:scale-[0.98]' : 'shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155] hover:shadow-[inset_2px_2px_4px_#0f172a,inset_-2px_-2px_4px_#334155]'}` : `rounded-xl bg-slate-200 text-indigo-700 transition-all duration-300 ${primary ? 'shadow-[6px_6px_12px_#b8c0cc,-6px_-6px_12px_#ffffff] hover:shadow-[2px_2px_4px_#b8c0cc,-2px_-2px_4px_#ffffff] hover:scale-[0.98]' : 'shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#b8c0cc,inset_-2px_-2px_4px_#ffffff]'}`;
-            if (style === 'high_contrast_brutalist') return primary ? 'bg-indigo-300 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-indigo-400 transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0_#94a3b8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#94a3b8] hover:bg-stone-200 transition-all');
-            if (style === 'minimal_flat') return primary ? 'rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 hover:-translate-y-0.5 transition-transform' : 'rounded-lg border-2 border-current hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors';
-            return primary ? 'rounded-xl bg-indigo-600 text-white shadow-lg hover:bg-indigo-700 hover:shadow-xl hover:-translate-y-0.5 transition-all' : 'rounded-xl border border-current/20 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors';
+            if (style === 'high_contrast_brutalist') return primary ? 'tpuirf-palette-accent text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0_#94a3b8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#94a3b8] hover:bg-stone-200 transition-all');
+            if (style === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary text-white hover:-translate-y-0.5 transition-transform' : 'rounded-lg border-2 border-current tpuirf-palette-soft transition-colors';
+            return primary ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all' : 'rounded-xl border border-current/20 shadow-sm tpuirf-palette-soft transition-colors';
         },
         compactSelectionButtonClass(style) {
             if (style === 'high_contrast_brutalist') return this.isStyleSelected(style) ? 'bg-rose-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-rose-500 transition-all' : 'bg-emerald-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-emerald-500 transition-all';
-            if (style === 'glassmorphism') return this.isStyleSelected(style) ? 'rounded-xl bg-gradient-to-br from-rose-400/80 to-pink-500/80 text-white backdrop-blur-md border border-white/50 border-t-white/80 shadow-[0_4px_12px_rgba(244,63,94,0.3)] hover:from-rose-400 hover:to-pink-400 transition-all' : 'rounded-xl bg-gradient-to-br from-emerald-400/80 to-teal-500/80 text-white backdrop-blur-md border border-white/50 border-t-white/80 shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:from-emerald-400 hover:to-teal-400 transition-all';
+            if (style === 'glassmorphism') return this.isStyleSelected(style) ? 'rounded-xl tpuirf-palette-primary text-white backdrop-blur-md border border-white/50 border-t-white/80 shadow-lg transition-all' : 'rounded-xl tpuirf-palette-soft tpuirf-palette-deep-text border border-white/50 shadow-lg transition-all';
             if (style === 'neumorphism') return this.compactButtonClass(style, !this.isStyleSelected(style));
-            return this.isStyleSelected(style) ? 'rounded-xl bg-rose-600 text-white shadow-lg hover:bg-rose-700 hover:-translate-y-0.5 transition-all' : 'rounded-xl bg-emerald-600 text-white shadow-lg hover:bg-emerald-700 hover:-translate-y-0.5 transition-all';
+            return this.isStyleSelected(style) ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg hover:-translate-y-0.5 transition-all' : 'rounded-xl tpuirf-palette-soft tpuirf-palette-deep-text shadow-lg transition-all';
         },
         eventUuid() {
             if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -872,17 +908,17 @@ function researchPreferenceTask(config) {
             const dark = this.combinedPreferences.theme === 'dark';
             if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-900 text-slate-100' : 'bg-stone-200 text-slate-900';
             if (this.fullscreenStyle === 'neumorphism') return dark ? 'bg-slate-800 text-slate-100' : 'bg-[#e3e8ef] text-slate-800';
-            if (this.fullscreenStyle === 'glassmorphism') return dark ? 'bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100' : 'bg-gradient-to-br from-rose-100 via-slate-100 to-blue-100 text-slate-800';
-            return dark ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100' : 'bg-gradient-to-br from-indigo-100 via-white to-cyan-100 text-slate-900';
+            if (this.fullscreenStyle === 'glassmorphism') return dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800';
+            return dark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900';
         },
         fullscreenSurfaceClass() {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
                 glassmorphism: dark ? 'rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'rounded-2xl bg-gradient-to-br from-white/60 to-white/20 backdrop-blur-2xl border border-white shadow-[0_8px_32px_rgba(31,38,135,0.15)]',
                 neumorphism: dark ? 'rounded-2xl bg-slate-800 shadow-[8px_8px_20px_#0f172a,-8px_-8px_20px_#334155]' : 'rounded-2xl bg-slate-200 shadow-[12px_12px_28px_#b8c0cc,-12px_-12px_28px_#ffffff]',
-                material_elevated: dark ? 'rounded-2xl bg-slate-800 shadow-2xl' : 'rounded-2xl bg-white shadow-2xl',
+                material_elevated: dark ? 'rounded-2xl tpuirf-palette-deep shadow-2xl' : 'rounded-2xl tpuirf-palette-bg shadow-2xl',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[9px_9px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[9px_9px_0_#94a3b8]',
-                minimal_flat: dark ? 'rounded-xl bg-slate-900 border-2 border-slate-700' : 'rounded-xl bg-white border-2 border-slate-300',
+                minimal_flat: dark ? 'rounded-xl tpuirf-palette-deep border-2 border-slate-700' : 'rounded-xl tpuirf-palette-bg border-2 border-slate-300',
             }[this.fullscreenStyle] || (dark ? 'rounded-2xl bg-slate-800' : 'rounded-2xl bg-white');
         },
         fullscreenNavigationClass() {
@@ -890,10 +926,10 @@ function researchPreferenceTask(config) {
             return {
                 glassmorphism: dark ? 'bg-white/10 text-white backdrop-blur-2xl border border-white/20 shadow-2xl' : 'bg-white/35 text-slate-900 backdrop-blur-2xl border border-white/80 shadow-2xl',
                 neumorphism: dark ? 'bg-slate-800 text-slate-100 shadow-[8px_8px_20px_#0f172a,-8px_-8px_20px_#334155]' : 'bg-slate-200 text-slate-900 shadow-[8px_8px_20px_#b8c0cc,-8px_-8px_20px_#ffffff]',
-                material_elevated: dark ? 'bg-slate-800 text-white shadow-xl' : 'bg-white text-slate-900 shadow-xl',
+                material_elevated: dark ? 'tpuirf-palette-deep text-white shadow-xl' : 'tpuirf-palette-bg text-slate-900 shadow-xl',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[7px_7px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[7px_7px_0_#94a3b8]',
-                minimal_flat: dark ? 'bg-slate-900 text-white border-2 border-slate-700' : 'bg-white text-slate-900 border-2 border-slate-300',
-            }[this.fullscreenStyle] || 'bg-indigo-700 text-white';
+                minimal_flat: dark ? 'tpuirf-palette-deep text-white border-2 border-slate-700' : 'tpuirf-palette-bg text-slate-900 border-2 border-slate-300',
+            }[this.fullscreenStyle] || 'tpuirf-palette-primary text-white';
         },
         fullscreenNavItemClass(item) {
             const active = this.demoActiveNav === item;
@@ -901,8 +937,8 @@ function researchPreferenceTask(config) {
             if (this.fullscreenStyle === 'glassmorphism') return active ? 'rounded-xl bg-white/30 backdrop-blur-xl border border-white/50 shadow-lg' : 'rounded-xl border border-transparent hover:bg-white/10';
             if (this.fullscreenStyle === 'neumorphism') return dark ? `rounded-xl bg-slate-800 transition-shadow duration-300 ${active ? 'text-indigo-400 shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155]' : 'shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155] hover:shadow-[inset_3px_3px_6px_#0f172a,inset_-3px_-3px_6px_#334155]'}` : `rounded-xl bg-slate-200 transition-shadow duration-300 ${active ? 'text-indigo-700 shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff]' : 'shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8c0cc,inset_-3px_-3px_6px_#ffffff]'}`;
             if (this.fullscreenStyle === 'high_contrast_brutalist') return active ? 'bg-indigo-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000]' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 hover:bg-emerald-100');
-            if (this.fullscreenStyle === 'minimal_flat') return active ? 'rounded-lg bg-indigo-600 text-white' : 'rounded-lg hover:bg-black/5';
-            return active ? 'rounded-xl bg-indigo-600 text-white shadow-md' : 'rounded-xl hover:bg-black/5';
+            if (this.fullscreenStyle === 'minimal_flat') return active ? 'rounded-lg tpuirf-palette-primary text-white' : 'rounded-lg tpuirf-palette-soft';
+            return active ? 'rounded-xl tpuirf-palette-primary text-white shadow-md' : 'rounded-xl tpuirf-palette-soft';
         },
         fullscreenInputClass() {
             const dark = this.combinedPreferences.theme === 'dark';
@@ -919,28 +955,30 @@ function researchPreferenceTask(config) {
             if (this.fullscreenStyle === 'glassmorphism') return primary ? 'rounded-xl bg-white/30 backdrop-blur-xl border border-white/60 shadow-lg hover:bg-white/40' : 'rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 hover:bg-white/20';
             if (this.fullscreenStyle === 'neumorphism') return dark ? `rounded-xl bg-slate-800 text-indigo-400 ${primary ? 'shadow-[6px_6px_12px_#0f172a,-6px_-6px_12px_#334155] hover:shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155]' : 'shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155] hover:shadow-[inset_2px_2px_4px_#0f172a,inset_-2px_-2px_4px_#334155]'}` : `rounded-xl bg-slate-200 text-indigo-700 ${primary ? 'shadow-[6px_6px_12px_#b8c0cc,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff]' : 'shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#b8c0cc,inset_-2px_-2px_4px_#ffffff]'}`;
             if (this.fullscreenStyle === 'high_contrast_brutalist') return primary ? 'bg-indigo-400 text-slate-900 border-4 border-black shadow-[5px_5px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#000] hover:bg-indigo-500 transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[5px_5px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[5px_5px_0_#94a3b8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#94a3b8] hover:bg-stone-200 transition-all');
-            if (this.fullscreenStyle === 'minimal_flat') return primary ? 'rounded-lg bg-indigo-600 text-white hover:bg-indigo-700' : 'rounded-lg border-2 border-current hover:bg-black/5 dark:hover:bg-white/10';
-            return primary ? 'rounded-xl bg-indigo-600 text-white shadow-lg hover:bg-indigo-700' : 'rounded-xl border border-current/20 hover:bg-black/5 dark:hover:bg-white/10';
+            if (this.fullscreenStyle === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary text-white' : 'rounded-lg border-2 border-current tpuirf-palette-soft';
+            return primary ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg' : 'rounded-xl border border-current/20 tpuirf-palette-soft';
         },
         fullscreenIconButtonClass() { return this.fullscreenButtonClass(false); },
-        fullscreenTextActionClass() { return this.fullscreenStyle === 'high_contrast_brutalist' ? 'font-black underline decoration-4 hover:opacity-70' : this.fullscreenStyle === 'neumorphism' ? 'text-indigo-600 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300' : 'text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300'; },
+        fullscreenTextActionClass() { return this.fullscreenStyle === 'high_contrast_brutalist' ? 'font-black underline decoration-4 hover:opacity-70' : 'tpuirf-palette-primary-text'; },
         fullscreenListItemClass() {
             if (this.fullscreenStyle === 'glassmorphism') return 'rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 hover:bg-white/20';
             if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-xl bg-slate-800 shadow-[inset_3px_3px_7px_#0f172a,inset_-3px_-3px_7px_#334155]' : 'rounded-xl bg-slate-200 shadow-[inset_3px_3px_7px_#b8c0cc,inset_-3px_-3px_7px_#ffffff]';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black hover:bg-slate-700 transition-colors' : 'bg-stone-50 text-slate-900 border-4 border-slate-900 hover:bg-rose-100';
-            return 'rounded-xl border border-current/10 hover:bg-black/5';
+            const dark = this.combinedPreferences.theme === 'dark';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black hover:bg-slate-700 transition-colors' : 'tpuirf-palette-soft text-slate-900 border-4 border-slate-900';
+            return 'rounded-xl border border-current/10 tpuirf-palette-soft';
         },
         fullscreenIconBadgeClass() {
             if (this.fullscreenStyle === 'glassmorphism') return 'rounded-full bg-white/20 backdrop-blur-xl border border-white/40';
             if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-full bg-slate-800 shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155]' : 'rounded-full bg-slate-200 shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff]';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return 'bg-indigo-400 text-slate-900 border-4 border-black shadow-[2px_2px_0_#000]';
-            return 'rounded-full bg-indigo-500 text-white';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return 'tpuirf-palette-accent text-slate-900 border-4 border-black shadow-[2px_2px_0_#000]';
+            return 'rounded-full tpuirf-palette-primary text-white';
         },
         fullscreenToastClass() {
             if (this.fullscreenStyle === 'glassmorphism') return 'rounded-xl bg-white/20 backdrop-blur-2xl border border-white/50 shadow-2xl';
             if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-xl bg-slate-800 text-white shadow-[7px_7px_15px_#0f172a,-7px_-7px_15px_#334155]' : 'rounded-xl bg-slate-200 text-slate-900 shadow-[7px_7px_15px_#b8c0cc,-7px_-7px_15px_#ffffff]';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[6px_6px_0_#000]' : 'bg-blue-200 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0_#64748b]';
-            return 'rounded-xl bg-slate-950 text-white shadow-2xl';
+            const dark = this.combinedPreferences.theme === 'dark';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[6px_6px_0_#000]' : 'tpuirf-palette-soft text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0_#64748b]';
+            return 'rounded-xl tpuirf-palette-deep text-white shadow-2xl';
         },
         fullscreenModalOverlayClass() { return this.fullscreenStyle === 'glassmorphism' ? 'bg-slate-950/40' : this.fullscreenStyle === 'high_contrast_brutalist' ? 'bg-slate-800/55' : 'bg-slate-950/60'; },
     };
