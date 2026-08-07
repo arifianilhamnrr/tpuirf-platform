@@ -5,6 +5,7 @@ namespace App\Presentation\Http\Controllers;
 use App\Application\Interfaces\AuthServiceInterface;
 use App\Application\Interfaces\ExplainabilityServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
+use App\Infrastructure\Persistence\Models\ParticipantPreference;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,12 @@ class RecommendationController extends Controller
     public function show(): View
     {
         $user = $this->authService->getCurrentUser();
+        $preference = ParticipantPreference::query()
+            ->where('user_id', $user->id)
+            ->whereHas('experiment', fn ($query) => $query->where('status', 'completed'))
+            ->with('experiment')
+            ->latest()
+            ->first();
         $recommendation = $this->recommendationService->getRecommendation($user->id);
 
         if (!$recommendation) {
@@ -35,6 +42,8 @@ class RecommendationController extends Controller
         return view('recommendation.show', [
             'recommendation' => $recommendation,
             'explanations' => $explanations,
+            'preferenceExperiment' => $preference?->experiment,
+            'finalPreferences' => $preference?->final_config ?? [],
         ]);
     }
 

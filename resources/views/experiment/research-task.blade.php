@@ -9,7 +9,7 @@
         'small' => 'Kecil', 'medium' => 'Sedang', 'large' => 'Besar',
         'compact' => 'Rapat', 'comfortable' => 'Sedang', 'spacious' => 'Renggang',
         'top' => 'Navigasi Atas', 'left' => 'Bilah Samping Kiri', 'bottom' => 'Navigasi Bawah',
-        'outline' => 'Garis', 'filled' => 'Penuh', 'duotone' => 'Dua Warna',
+        'outline' => 'Outline', 'filled' => 'Filled', 'duotone' => 'Dual Tone',
          'minimal_flat' => 'Minimal / Datar', 'material_elevated' => 'Material / Berelevasi',
          'glassmorphism' => 'Glassmorphism', 'neumorphism' => 'Neumorphism',
          'high_contrast_brutalist' => 'Kontras Tinggi / Brutalis',
