@@ -255,8 +255,8 @@
         </section>
 
         <div x-show="fullscreenStyle" x-cloak class="fixed inset-0 z-[100] overflow-y-auto" :style="paletteVariables()" :class="[fullscreenBackgroundClass(), combinedFontClass(), combinedFontSizeClass()]" role="dialog" aria-modal="true" @keydown.escape.window="demoModal ? demoModal = null : closeFullscreen()">
-            <div class="relative min-h-full flex" :class="combinedPreferences.navigation_position === 'left' ? '' : 'flex-col'">
-                <header class="sticky top-0 z-30 min-h-18" :class="fullscreenNavigationClass()">
+            <div class="relative min-h-full flex flex-col">
+                <header class="sticky top-0 z-50 min-h-18 shrink-0" :class="fullscreenNavigationClass()">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
                         <button x-show="combinedPreferences.navigation_position === 'left'" type="button" aria-label="Buka atau tutup navigasi" class="w-11 h-11 shrink-0 flex items-center justify-center text-xl" :class="fullscreenIconButtonClass()" @click="sidebarOpen = !sidebarOpen" data-track-component="fullscreen-sidebar-toggle">☰</button>
                         <div class="min-w-0"><strong class="block text-base sm:text-lg">TPUIRF Workspace</strong><span class="block text-xs opacity-60 truncate" x-text="optionLabel(fullscreenStyle)"></span></div>
@@ -265,14 +265,14 @@
                     </div>
                 </header>
 
-                <div x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition.opacity class="fixed inset-0 top-[72px] z-20 bg-slate-950/30 lg:hidden" @click="sidebarOpen = false"></div>
-                <aside x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition class="fixed left-0 top-[72px] bottom-0 z-30 w-72 p-5" :class="fullscreenNavigationClass()">
+                <div x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition.opacity class="fixed inset-0 top-[72px] z-30 bg-slate-950/30 lg:hidden" @click="sidebarOpen = false"></div>
+                <aside x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition class="fixed left-0 top-[72px] bottom-0 z-40 w-72 overflow-y-auto p-5" :class="fullscreenNavigationClass()">
                     <p class="px-3 text-xs font-semibold uppercase tracking-[.18em] opacity-50">Menu Utama</p>
                     <nav class="mt-5 space-y-3"><template x-for="item in ['Beranda', 'Proyek', 'Aktivitas', 'Profil']" :key="item">                    <button type="button" class="w-full px-4 py-3 text-left flex items-center gap-3" :class="fullscreenNavItemClass(item)" @click="activateDemoNav(item)" :data-track-component="`fullscreen-nav-${item.toLowerCase()}`"><i class="text-xl w-6 text-center" :class="combinedIconClass() + ' ' + demoIcon(item)"></i><span class="block w-full truncate text-center" x-text="item"></span></button></template></nav>
                     <div class="mt-8 p-4" :class="fullscreenSurfaceClass()"><p class="text-xs opacity-60">Penyimpanan tim</p><div class="mt-3 h-2 overflow-hidden rounded-full bg-black/10"><div class="h-full w-2/3 bg-current opacity-60"></div></div><p class="mt-2 text-xs">6,4 GB dari 10 GB</p></div>
                 </aside>
 
-                <main class="flex-1 transition-[margin]" :class="[combinedDensityClass(), combinedPreferences.navigation_position === 'left' && sidebarOpen ? 'lg:ml-72' : '', combinedPreferences.navigation_position === 'bottom' ? 'pb-32' : '']">
+                 <main class="flex-1 transition-[margin]" :class="[combinedDensityClass(), combinedPreferences.navigation_position === 'left' && sidebarOpen ? 'lg:ml-72' : '', combinedPreferences.navigation_position === 'bottom' ? 'pb-32' : '']">
                     <div class="max-w-7xl mx-auto">
                         <div><p class="text-sm opacity-55" x-text="demoActiveNav + ' · Ringkasan hari ini'"></p><h2 class="mt-1 text-2xl sm:text-4xl font-bold">Selamat datang di ruang kerja Anda</h2><p class="mt-2 max-w-2xl opacity-70">Pantau eksperimen, baca insight terbaru, dan kelola pekerjaan tim dalam satu tempat.</p></div>
                         <div class="mt-6 flex flex-col sm:flex-row gap-3"><label class="flex-1"><span class="sr-only">Cari proyek</span><input type="search" class="w-full px-4 py-3" :class="fullscreenInputClass()" placeholder="Cari proyek, artikel, atau anggota tim..." @input.debounce.400ms="showDemoToast('Hasil pencarian diperbarui')"></label><button type="button" class="px-5 py-3 font-semibold" :class="fullscreenButtonClass(true)" @click="openDemoModal('Buat Proyek Baru')">+ Proyek Baru</button></div>
