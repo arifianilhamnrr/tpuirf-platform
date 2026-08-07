@@ -24,7 +24,8 @@
 
         <div class="mt-8 grid sm:grid-cols-2 gap-3 text-left">
             @foreach([
-                'Tema' => $experiment['preferences']['theme'] ?? '-',
+                 'Tema' => $experiment['preferences']['theme'] ?? '-',
+                 'Palet Warna' => $experiment['preferences']['color_palette'] ?? '-',
                 'Font' => trim(($experiment['preferences']['font_family'] ?? '-').' · '.($experiment['preferences']['font_size'] ?? '-')),
                 'Tata Letak' => $experiment['preferences']['layout_density'] ?? '-',
                 'Navigasi' => $experiment['preferences']['navigation_position'] ?? '-',

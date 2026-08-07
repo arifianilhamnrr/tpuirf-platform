@@ -329,6 +329,9 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
                     'recommendation_quality' => $evaluation['recommendation_quality'] ?? null,
                     'feedback' => $evaluation['feedback'] ?? null,
                     'additional_data' => $evaluation['additional_data'] ?? null,
+                    'ai_usage_frequency' => $evaluation['ai_usage_frequency'],
+                    'ai_answer_trust' => $evaluation['ai_answer_trust'],
+                    'ai_explanation_preference' => $evaluation['ai_explanation_preference'],
                 ],
             );
 
@@ -338,6 +341,9 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
                     'trust_score' => $evaluation['trust_score'],
                     'transparency_score' => $evaluation['transparency_score'],
                     'ui_satisfaction' => $evaluation['ui_satisfaction'],
+                    'ai_usage_frequency' => $evaluation['ai_usage_frequency'],
+                    'ai_answer_trust' => $evaluation['ai_answer_trust'],
+                    'ai_explanation_preference' => $evaluation['ai_explanation_preference'],
                 ]);
             }
 
@@ -457,19 +463,25 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
 
         if ($taskKey === 'design_style') {
             $designStyles = $payload['design_styles'] ?? [];
+            $colorPalette = $payload['color_palette'] ?? null;
+            $paletteOptions = ['blue', 'green', 'purple', 'orange', 'rose', 'neutral'];
 
             if (! is_array($designStyles)
                 || $designStyles === []
                 || count($designStyles) !== count(array_unique($designStyles))
-                || array_diff($designStyles, $definition['options']) !== []) {
+                || array_diff($designStyles, $definition['options']) !== []
+                || ! in_array($colorPalette, $paletteOptions, true)) {
                 throw ValidationException::withMessages([
-                    'selection_payload.design_styles' => 'Pilih minimal satu gaya desain yang valid.',
+                    'selection_payload' => 'Pilih minimal satu gaya desain dan satu palet warna yang valid.',
                 ]);
             }
 
             return [
                 'selected_option' => implode('|', $designStyles),
-                'payload' => ['design_styles' => array_values($designStyles)],
+                'payload' => [
+                    'design_styles' => array_values($designStyles),
+                    'color_palette' => $colorPalette,
+                ],
             ];
         }
 
@@ -491,6 +503,7 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
     {
         $fields = match ($taskKey) {
             'theme' => ['theme' => $payload['theme']],
+            'color_palette' => ['color_palette' => $payload['color_palette']],
             'typography' => [
                 'font_family' => $payload['font_family'],
                 'font_size' => $payload['font_size'],
@@ -498,7 +511,10 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
             'layout_density' => ['layout_density' => $payload['layout_density']],
             'navigation_position' => ['navigation_position' => $payload['navigation_position']],
             'icon_style' => ['icon_style' => $payload['icon_style']],
-            'design_style' => ['design_style' => implode('|', $payload['design_styles'])],
+            'design_style' => [
+                'design_style' => implode('|', $payload['design_styles']),
+                'color_palette' => $payload['color_palette'],
+            ],
             default => [],
         };
 
@@ -509,14 +525,13 @@ class PreferenceExperimentService implements PreferenceExperimentServiceInterfac
         $preference->fill($fields);
         $preference->final_config = array_filter([
             'theme' => $preference->theme,
+            'color_palette' => $preference->color_palette,
             'font_family' => $preference->font_family,
             'font_size' => $preference->font_size,
             'layout_density' => $preference->layout_density,
             'navigation_position' => $preference->navigation_position,
             'icon_style' => $preference->icon_style,
-            'design_styles' => $taskKey === 'design_style'
-                ? $payload['design_styles']
-                : ($preference->final_config['design_styles'] ?? null),
+            'design_styles' => $taskKey === 'design_style' ? $payload['design_styles'] : ($preference->final_config['design_styles'] ?? null),
         ], static fn ($value) => $value !== null);
         $preference->save();
     }

@@ -75,7 +75,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                     <div>
                         <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">Penelitian preferensi selesai</p>
-                        <h2 class="mt-1 text-xl font-bold text-gray-800 dark:text-white">Seluruh 6 tugas dan evaluasi sudah tersimpan</h2>
+                        <h2 class="mt-1 text-xl font-bold text-gray-800 dark:text-white">Seluruh {{ count(config('experiment.tasks')) }} tugas dan evaluasi sudah tersimpan</h2>
                         <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Anda tetap dapat membuka ringkasan pilihan akhir.</p>
                     </div>
                     <a href="{{ route('respondent.preference-experiment.complete.page', $preferenceExperiment['id']) }}" class="shrink-0 px-6 py-3 rounded-2xl bg-emerald-600 text-white text-sm font-semibold shadow-lg">Lihat Ringkasan</a>
@@ -96,7 +96,7 @@
                 <div class="flex items-center justify-between gap-5">
                     <div>
                         <h2 class="text-xl font-bold text-gray-800 dark:text-white">Lanjutkan Penelitian Preferensi</h2>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ $isEvaluation ? 'Evaluasi akhir' : 'Tugas '.$preferenceExperiment['current_step'].' dari 6' }}</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">{{ $isEvaluation ? 'Evaluasi akhir' : 'Tugas '.$preferenceExperiment['current_step'].' dari '.count(config('experiment.tasks')) }}</p>
                     </div>
                     <a href="{{ $continueUrl }}" class="shrink-0 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white text-sm font-semibold shadow-lg">Lanjutkan</a>
                 </div>
@@ -110,7 +110,7 @@
                     <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Siap Memulai?</h2>
-                <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Anda akan menyelesaikan 6 tugas preferensi UI, mencoba pratinjau langsung yang responsif, lalu memberi evaluasi akhir.</p>
+                <p class="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">Anda akan menyelesaikan {{ count(config('experiment.tasks')) }} tugas preferensi UI, mencoba pratinjau langsung yang responsif, lalu memberi evaluasi akhir.</p>
                 <a href="{{ route('respondent.preference-experiment.introduction') }}" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold hover:from-indigo-700 hover:to-cyan-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 shadow-lg shadow-indigo-500/25 transform hover:scale-[1.02] active:scale-[0.98]">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Mulai Eksperimen

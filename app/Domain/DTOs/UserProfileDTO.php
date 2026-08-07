@@ -16,6 +16,9 @@ class UserProfileDTO
         public readonly ?string $visualPreference,
         public readonly ?string $contextEnvironment,
         public readonly ?int $aiFamiliarity,
+        public readonly ?string $dailyDeviceUsage,
+        public readonly ?string $deviceUsageTime,
+        public readonly ?string $primaryDevicePurpose,
         public readonly ?array $additionalData,
     ) {}
 
@@ -33,6 +36,9 @@ class UserProfileDTO
             visualPreference: $data['visual_preference'] ?? null,
             contextEnvironment: $data['context_environment'] ?? null,
             aiFamiliarity: $data['ai_familiarity'] ?? null,
+            dailyDeviceUsage: $data['daily_device_usage'] ?? null,
+            deviceUsageTime: $data['device_usage_time'] ?? null,
+            primaryDevicePurpose: $data['primary_device_purpose'] ?? null,
             additionalData: $data['additional_data'] ?? null,
         );
     }
@@ -51,6 +57,9 @@ class UserProfileDTO
             'visual_preference' => $this->visualPreference,
             'context_environment' => $this->contextEnvironment,
             'ai_familiarity' => $this->aiFamiliarity,
+            'daily_device_usage' => $this->dailyDeviceUsage,
+            'device_usage_time' => $this->deviceUsageTime,
+            'primary_device_purpose' => $this->primaryDevicePurpose,
             'additional_data' => $this->additionalData,
         ];
     }

@@ -13,6 +13,7 @@ class ParticipantPreference extends Model
         'experiment_id',
         'user_id',
         'theme',
+        'color_palette',
         'font_family',
         'font_size',
         'layout_density',

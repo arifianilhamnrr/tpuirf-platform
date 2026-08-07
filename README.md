@@ -175,7 +175,7 @@ npm run build
 Konfigurasi utama berada di [`config/experiment.php`](config/experiment.php). Nilai berikut dapat diubah melalui `.env`:
 
 ```dotenv
-EXPERIMENT_PROTOCOL_VERSION=TPUIRF-PREF-v2
+EXPERIMENT_PROTOCOL_VERSION=TPUIRF-PREF-v3
 EXPERIMENT_CONSENT_VERSION=1.0
 EXPERIMENT_IDLE_THRESHOLD_SECONDS=30
 EXPERIMENT_MAX_EVENT_BATCH_SIZE=100
@@ -203,7 +203,7 @@ Validasi build frontend:
 npm run build
 ```
 
-Pengujian mencakup alur enam tugas, kepemilikan eksperimen, validasi urutan tugas, idempotensi event, pemulihan bentrok nomor urut, revisi preferensi, pemulihan draft, profil responden, evaluasi, dan ekspor pseudonim.
+Pengujian mencakup alur enam tugas, palet warna pada gaya desain akhir, kepemilikan eksperimen, validasi urutan tugas, idempotensi event, pemulihan bentrok nomor urut, revisi preferensi, pemulihan draft, profil responden, evaluasi, dan ekspor pseudonim.
 
 ## Struktur Direktori
 

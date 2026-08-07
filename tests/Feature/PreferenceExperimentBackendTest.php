@@ -46,6 +46,7 @@ class PreferenceExperimentBackendTest extends TestCase
         $this->assertDatabaseCount('experiments', 1);
         $this->assertDatabaseCount('experiment_tasks', 6);
         $this->assertDatabaseCount('participant_preferences', 1);
+        $this->assertSame('design_style', $first['tasks'][5]['task_key']);
 
         $this->getJson(route('respondent.preference-experiment.tasks.show', [
             'experimentId' => $first['id'],
@@ -74,6 +75,7 @@ class PreferenceExperimentBackendTest extends TestCase
             'design_style' => [
                 'selection_payload' => [
                     'design_styles' => ['glassmorphism', 'minimal_flat'],
+                    'color_palette' => 'blue',
                 ],
             ],
         ];
@@ -103,6 +105,7 @@ class PreferenceExperimentBackendTest extends TestCase
             'experiment_id' => $experimentId,
             'user_id' => $this->user->id,
             'theme' => 'dark',
+            'color_palette' => 'blue',
             'font_family' => 'high_legibility',
             'font_size' => 'large',
             'layout_density' => 'comfortable',
@@ -114,6 +117,11 @@ class PreferenceExperimentBackendTest extends TestCase
             ['glassmorphism', 'minimal_flat'],
             $this->user->experiments()->findOrFail($experimentId)
                 ->participantPreference->final_config['design_styles'],
+        );
+        $this->assertSame(
+            'blue',
+            $this->user->experiments()->findOrFail($experimentId)
+                ->participantPreference->final_config['color_palette'],
         );
 
         $this->postJson(route('respondent.preference-experiment.complete', [
@@ -127,6 +135,9 @@ class PreferenceExperimentBackendTest extends TestCase
             'transparency_score' => 5,
             'ui_satisfaction' => 4,
             'recommendation_quality' => 3,
+            'ai_usage_frequency' => 'often',
+            'ai_answer_trust' => 4,
+            'ai_explanation_preference' => 5,
             'feedback' => 'The live previews were clear.',
         ])->assertOk();
 
@@ -142,6 +153,9 @@ class PreferenceExperimentBackendTest extends TestCase
             'trust_score' => 4,
             'transparency_score' => 5,
             'ui_satisfaction' => 4,
+            'ai_usage_frequency' => 'often',
+            'ai_answer_trust' => 4,
+            'ai_explanation_preference' => 5,
         ]);
         $this->assertDatabaseCount('interaction_events', 9);
         $this->assertDatabaseHas('interaction_events', [
@@ -457,6 +471,9 @@ class PreferenceExperimentBackendTest extends TestCase
             'visual_preference' => 'modern',
             'context_environment' => 'school',
             'ai_familiarity' => 3,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'evening',
+            'primary_device_purpose' => 'productivity',
         ];
     }
 }

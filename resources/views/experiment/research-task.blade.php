@@ -10,9 +10,10 @@
         'compact' => 'Rapat', 'comfortable' => 'Sedang', 'spacious' => 'Renggang',
         'top' => 'Navigasi Atas', 'left' => 'Bilah Samping Kiri', 'bottom' => 'Navigasi Bawah',
         'outline' => 'Garis', 'filled' => 'Penuh', 'duotone' => 'Dua Warna',
-        'minimal_flat' => 'Minimal / Datar', 'material_elevated' => 'Material / Berelevasi',
-        'glassmorphism' => 'Glassmorphism', 'neumorphism' => 'Neumorphism',
-        'high_contrast_brutalist' => 'Kontras Tinggi / Brutalis',
+         'minimal_flat' => 'Minimal / Datar', 'material_elevated' => 'Material / Berelevasi',
+         'glassmorphism' => 'Glassmorphism', 'neumorphism' => 'Neumorphism',
+         'high_contrast_brutalist' => 'Kontras Tinggi / Brutalis',
+        'blue' => 'Biru', 'green' => 'Hijau', 'purple' => 'Ungu', 'orange' => 'Oranye', 'rose' => 'Rose', 'neutral' => 'Netral',
     ];
     $descriptions = [
         'minimal_flat' => 'Warna solid, bersih, dan minim dekorasi.',
@@ -166,23 +167,35 @@
                     class="rounded-3xl border-2 p-7 bg-white dark:bg-gray-800 transition"
                     :class="selectedOption === '{{ $option }}' ? 'border-indigo-500 ring-4 ring-indigo-500/15' : 'border-gray-200 dark:border-gray-700'">
                     <strong class="text-gray-900 dark:text-white">{{ $labels[$option] }}</strong>
-                    <div class="mt-8 flex justify-center gap-6 text-indigo-600 dark:text-indigo-400">
-                        @php
-                            $iconClass = match($option) {
-                                'filled' => 'fa-solid',
-                                'duotone' => 'fa-solid opacity-70 mix-blend-multiply dark:mix-blend-screen text-indigo-500',
-                                default => 'fa-regular',
-                            };
-                        @endphp
-                        <i class="text-[40px] fa-fw fa-house {{ $iconClass }}"></i>
-                        <i class="text-[40px] fa-fw fa-folder-tree {{ $iconClass }}"></i>
-                        <i class="text-[40px] fa-fw fa-check-circle {{ $iconClass }}"></i>
+                    <div class="mt-8 flex justify-center gap-6 text-indigo-600 dark:text-indigo-400" aria-label="Contoh ikon {{ $labels[$option] }}">
+                        @foreach(['fa-house' => 'Beranda', 'fa-folder' => 'Konten', 'fa-circle-check' => 'Konfirmasi'] as $icon => $iconLabel)
+                            @if($option === 'duotone')
+                                <span class="relative inline-flex w-10 h-10 items-center justify-center" title="{{ $iconLabel }}">
+                                    <i class="fa-solid {{ $icon }} absolute text-[40px] opacity-30 text-cyan-500" aria-hidden="true"></i>
+                                    <i class="fa-solid {{ $icon }} absolute text-[34px] text-indigo-700 dark:text-indigo-300 translate-x-0.5 -translate-y-0.5" aria-hidden="true"></i>
+                                </span>
+                            @elseif($option === 'filled')
+                                <i class="fa-solid {{ $icon }} text-[40px] w-10 text-center" title="{{ $iconLabel }}" aria-hidden="true"></i>
+                            @else
+                                <i class="fa-solid {{ $icon }} icon-outline-preview text-[40px] w-10 text-center" title="{{ $iconLabel }}" aria-hidden="true"></i>
+                            @endif
+                        @endforeach
                     </div>
                     <p class="mt-6 text-sm text-gray-500">Beranda · Konten · Konfirmasi</p>
                 </button>
             @endforeach
         </div>
     @elseif($task['task_key'] === 'design_style')
+        @php
+            $paletteDetails = [
+                'blue' => ['label' => 'Biru', 'classes' => 'from-sky-500 to-indigo-600', 'swatches' => ['#38bdf8', '#6366f1', '#172554']],
+                'green' => ['label' => 'Hijau', 'classes' => 'from-emerald-400 to-teal-700', 'swatches' => ['#34d399', '#14b8a6', '#134e4a']],
+                'purple' => ['label' => 'Ungu', 'classes' => 'from-violet-500 to-fuchsia-700', 'swatches' => ['#a78bfa', '#d946ef', '#581c87']],
+                'orange' => ['label' => 'Oranye', 'classes' => 'from-amber-400 to-orange-600', 'swatches' => ['#fbbf24', '#f97316', '#7c2d12']],
+                'rose' => ['label' => 'Rose', 'classes' => 'from-pink-400 to-rose-700', 'swatches' => ['#f472b6', '#f43f5e', '#881337']],
+                'neutral' => ['label' => 'Netral', 'classes' => 'from-slate-300 to-slate-700', 'swatches' => ['#e2e8f0', '#64748b', '#1e293b']],
+            ];
+        @endphp
         <div class="mb-6 rounded-3xl border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50/80 dark:bg-indigo-500/10 p-5">
             <p class="text-sm font-semibold text-indigo-700 dark:text-indigo-300">Konfigurasi pilihan Anda yang diterapkan</p>
             <div class="mt-3 flex flex-wrap gap-2 text-xs font-medium text-gray-700 dark:text-gray-200">
@@ -232,6 +245,14 @@
                 </section>
             @endforeach
         </div>
+        <section class="mt-6 rounded-3xl border border-gray-200 bg-white/70 p-5 dark:border-gray-700 dark:bg-gray-800/60">
+            <div class="flex items-start justify-between gap-4"><div><h2 class="font-bold text-gray-900 dark:text-white">Pilih palet warna</h2><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Palet ini akan diterapkan pada konfigurasi gaya desain akhir.</p></div><span class="text-sm font-semibold text-indigo-600 dark:text-indigo-400" x-text="selectedPalette ? optionLabel(selectedPalette) : 'Belum dipilih'"></span></div>
+            <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                @foreach($paletteDetails as $paletteKey => $palette)
+                    <button type="button" @click="choosePalette('{{ $paletteKey }}')" data-track-component="palette-{{ $paletteKey }}" data-option-id="{{ $paletteKey }}" class="rounded-2xl border-2 p-2 text-left transition hover:-translate-y-0.5" :class="selectedPalette === '{{ $paletteKey }}' ? 'border-indigo-500 ring-4 ring-indigo-500/15' : 'border-gray-200 dark:border-gray-700'"><div class="h-16 rounded-xl bg-gradient-to-br {{ $palette['classes'] }} p-2 text-xs font-semibold text-white">{{ $palette['label'] }}</div><div class="mt-2 flex gap-1">@foreach($palette['swatches'] as $swatch)<span class="h-2 flex-1 rounded-full" style="background-color: {{ $swatch }}"></span>@endforeach</div></button>
+                @endforeach
+            </div>
+        </section>
 
         <div x-show="fullscreenStyle" x-cloak class="fixed inset-0 z-[100] overflow-y-auto" :class="[fullscreenBackgroundClass(), combinedFontClass(), combinedFontSizeClass()]" role="dialog" aria-modal="true" @keydown.escape.window="demoModal ? demoModal = null : closeFullscreen()">
             <div class="relative min-h-full flex" :class="combinedPreferences.navigation_position === 'left' ? '' : 'flex-col'">
@@ -315,6 +336,7 @@ function researchPreferenceTask(config) {
         fontFamily: config.initialSelectionPayload?.font_family || null,
         fontSize: config.initialSelectionPayload?.font_size || null,
         selectedStyles: config.initialSelectionPayload?.design_styles || [],
+        selectedPalette: config.initialSelectionPayload?.color_palette || null,
         expandedStyle: null,
         fullscreenStyle: null,
         sidebarOpen: true,
@@ -522,6 +544,16 @@ function researchPreferenceTask(config) {
 
         isStyleSelected(style) { return this.selectedStyles.includes(style); },
 
+        choosePalette(palette) {
+            const previous = this.selectedPalette;
+            this.selectedPalette = palette;
+            this.changeCount++;
+            this.logEvent('selection_changed', `palette-${palette}`, palette, {
+                previous_color_palette: previous,
+                color_palette: palette,
+            });
+        },
+
         togglePreview(style) {
             const now = performance.now();
             if (this.expandedStyle) {
@@ -700,8 +732,8 @@ function researchPreferenceTask(config) {
             if (this.taskKey === 'typography' && (!this.fontFamily || !this.fontSize)) {
                 this.errorMessage = 'Pilih keluarga font dan ukuran terlebih dahulu.'; return;
             }
-            if (this.taskKey === 'design_style' && this.selectedStyles.length === 0) {
-                this.errorMessage = 'Pilih minimal satu gaya desain terlebih dahulu.'; return;
+            if (this.taskKey === 'design_style' && (this.selectedStyles.length === 0 || !this.selectedPalette)) {
+                this.errorMessage = 'Pilih minimal satu gaya desain dan satu palet warna terlebih dahulu.'; return;
             }
             if (!['typography', 'design_style'].includes(this.taskKey) && !this.selectedOption) {
                 this.errorMessage = 'Pilih salah satu opsi terlebih dahulu.'; return;
@@ -720,6 +752,7 @@ function researchPreferenceTask(config) {
                 active_duration_ms: Math.round(this.activeMs),
                 idle_duration_ms: Math.round(this.idleMs),
                 design_styles: this.taskKey === 'design_style' ? this.selectedStyles : undefined,
+                color_palette: this.taskKey === 'design_style' ? this.selectedPalette : undefined,
             });
             const eventsFlushed = await this.flushEvents();
             if (!eventsFlushed) {
@@ -733,7 +766,7 @@ function researchPreferenceTask(config) {
                 change_count: this.changeCount,
             };
             if (this.taskKey === 'typography') body.selection_payload = { font_family: this.fontFamily, font_size: this.fontSize };
-            else if (this.taskKey === 'design_style') body.selection_payload = { design_styles: this.selectedStyles };
+            else if (this.taskKey === 'design_style') body.selection_payload = { design_styles: this.selectedStyles, color_palette: this.selectedPalette };
             else body.selected_option = this.selectedOption;
             try {
                 const response = await fetch(this.selectionUrl, {
@@ -754,7 +787,7 @@ function researchPreferenceTask(config) {
 
         selectionSummary() {
             if (this.taskKey === 'typography') return this.fontFamily && this.fontSize ? `Pilihan: ${this.optionLabel(this.fontFamily)} · ${this.optionLabel(this.fontSize)}` : 'Belum ada pilihan';
-            if (this.taskKey === 'design_style') return this.selectedStyles.length ? `${this.selectedStyles.length} gaya dipilih: ${this.selectedStyles.map(style => this.optionLabel(style)).join(' · ')}` : 'Belum ada gaya dipilih';
+            if (this.taskKey === 'design_style') return this.selectedStyles.length && this.selectedPalette ? `${this.selectedStyles.length} gaya · Palet ${this.optionLabel(this.selectedPalette)}` : 'Pilih gaya desain dan palet warna';
             return this.selectedOption ? `Pilihan: ${this.optionLabel(this.selectedOption)}` : 'Belum ada pilihan';
         },
         optionLabel(option) { return this.optionLabels[option] || option || ''; },
@@ -764,6 +797,7 @@ function researchPreferenceTask(config) {
         combinedPreferenceLabels() {
             return [
                 `Tema: ${this.optionLabel(this.combinedPreferences.theme)}`,
+                `Palet: ${this.optionLabel(this.combinedPreferences.color_palette)}`,
                 `Font: ${this.optionLabel(this.combinedPreferences.font_family)}`,
                 `Ukuran: ${this.optionLabel(this.combinedPreferences.font_size)}`,
                 `Tata letak: ${this.optionLabel(this.combinedPreferences.layout_density)}`,
@@ -777,10 +811,14 @@ function researchPreferenceTask(config) {
         combinedCardPaddingClass() { return { compact: 'p-4', comfortable: 'p-6', spacious: 'p-8' }[this.combinedPreferences.layout_density] || 'p-6'; },
         combinedGridGapClass() { return { compact: 'gap-3 mt-3', comfortable: 'gap-5 mt-5', spacious: 'gap-8 mt-8' }[this.combinedPreferences.layout_density] || 'gap-5 mt-5'; },
         combinedIconClass() {
-            const baseClass = { outline: 'fa-regular', filled: 'fa-solid', duotone: 'fa-solid text-current opacity-80 mix-blend-multiply dark:mix-blend-screen' }[this.combinedPreferences.icon_style] || 'fa-regular';
+            const baseClass = {
+                outline: 'fa-solid icon-outline-preview',
+                filled: 'fa-solid',
+                duotone: 'fa-solid icon-duotone-preview',
+            }[this.combinedPreferences.icon_style] || 'fa-solid icon-outline-preview';
             return `fa-fw ${baseClass}`;
         },
-        demoIcon(item) { return { Beranda: 'fa-house', Proyek: 'fa-folder-tree', Aktivitas: 'fa-clock-rotate-left', Profil: 'fa-circle-user' }[item] || 'fa-circle'; },
+        demoIcon(item) { return { Beranda: 'fa-compass', Proyek: 'fa-folder', Aktivitas: 'fa-clock', Profil: 'fa-user' }[item] || 'fa-circle'; },
         previewBackgroundClass() { return this.combinedPreferences.theme === 'dark' ? 'bg-slate-950' : 'bg-gradient-to-br from-indigo-100 via-cyan-50 to-purple-100'; },
         compactSurfaceClass(style, nested = false) {
             const dark = this.combinedPreferences.theme === 'dark';

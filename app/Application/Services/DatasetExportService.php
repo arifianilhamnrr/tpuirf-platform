@@ -241,7 +241,7 @@ class DatasetExportService implements DatasetExportServiceInterface
     private function buildPreferenceDataset(): array
     {
         $headers = [
-            'participant_code', 'protocol_version', 'theme', 'font_family',
+            'participant_code', 'protocol_version', 'theme', 'color_palette', 'font_family',
             'font_size', 'layout_density', 'navigation_position', 'icon_style',
             'design_style', 'final_config',
         ];
@@ -253,6 +253,7 @@ class DatasetExportService implements DatasetExportServiceInterface
                 $preference->experiment_id,
                 $preference->experiment?->protocol_version,
                 $preference->theme,
+                $preference->color_palette,
                 $preference->font_family,
                 $preference->font_size,
                 $preference->layout_density,

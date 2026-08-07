@@ -45,6 +45,9 @@ class UserProfileService implements UserProfileServiceInterface
             && ! is_null($profile->deviceType)
             && ! is_null($profile->visualPreference)
             && ! is_null($profile->contextEnvironment)
-            && ! is_null($profile->aiFamiliarity);
+            && ! is_null($profile->aiFamiliarity)
+            && ! is_null($profile->dailyDeviceUsage)
+            && ! is_null($profile->deviceUsageTime)
+            && ! is_null($profile->primaryDevicePurpose);
     }
 }

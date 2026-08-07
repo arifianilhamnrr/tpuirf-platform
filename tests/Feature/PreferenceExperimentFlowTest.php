@@ -132,6 +132,9 @@ class PreferenceExperimentFlowTest extends TestCase
             'visual_preference' => 'modern',
             'context_environment' => 'home',
             'ai_familiarity' => 4,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'morning',
+            'primary_device_purpose' => 'education',
         ])->assertRedirect(route('respondent.profile.show'));
 
         $this->assertDatabaseHas('user_profiles', [
@@ -165,6 +168,9 @@ class PreferenceExperimentFlowTest extends TestCase
             'visual_preference' => 'modern',
             'context_environment' => 'home',
             'ai_familiarity' => 4,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'morning',
+            'primary_device_purpose' => 'education',
         ])->assertSessionHasErrors('gender');
     }
 
@@ -226,6 +232,9 @@ class PreferenceExperimentFlowTest extends TestCase
             'visual_preference' => 'modern',
             'context_environment' => 'school',
             'ai_familiarity' => 3,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'evening',
+            'primary_device_purpose' => 'productivity',
         ];
     }
 }

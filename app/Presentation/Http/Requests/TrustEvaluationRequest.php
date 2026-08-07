@@ -20,6 +20,9 @@ class TrustEvaluationRequest extends FormRequest
             'recommendation_quality' => ['nullable', 'numeric', 'between:1,5'],
             'feedback' => ['nullable', 'string', 'max:5000'],
             'additional_data' => ['nullable', 'array'],
+            'ai_usage_frequency' => ['required', 'string', 'in:never,rarely,sometimes,often,very_often'],
+            'ai_answer_trust' => ['required', 'numeric', 'between:1,5'],
+            'ai_explanation_preference' => ['required', 'numeric', 'between:1,5'],
         ];
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'protocol_version' => env('EXPERIMENT_PROTOCOL_VERSION', 'TPUIRF-PREF-v2'),
+    'protocol_version' => env('EXPERIMENT_PROTOCOL_VERSION', 'TPUIRF-PREF-v4'),
     'consent_version' => env('EXPERIMENT_CONSENT_VERSION', '1.0'),
     'idle_threshold_seconds' => (int) env('EXPERIMENT_IDLE_THRESHOLD_SECONDS', 30),
     'max_event_batch_size' => (int) env('EXPERIMENT_MAX_EVENT_BATCH_SIZE', 100),

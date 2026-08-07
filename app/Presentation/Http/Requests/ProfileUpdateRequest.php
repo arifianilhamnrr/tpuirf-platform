@@ -22,6 +22,9 @@ class ProfileUpdateRequest extends FormRequest
             'visual_preference' => ['required', 'string', 'in:minimal,vibrant,classic,modern'],
             'context_environment' => ['required', 'string', 'in:home,office,school,public,other'],
             'ai_familiarity' => ['required', 'integer', 'min:1', 'max:5'],
+            'daily_device_usage' => ['required', 'string', 'in:under_1,1_3,3_5,5_8,over_8'],
+            'device_usage_time' => ['required', 'string', 'in:morning,afternoon,evening,night'],
+            'primary_device_purpose' => ['required', 'string', 'in:communication,education,shopping,entertainment,finance,productivity,social_media,other'],
         ];
     }
 

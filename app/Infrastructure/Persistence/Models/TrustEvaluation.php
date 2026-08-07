@@ -19,6 +19,9 @@ class TrustEvaluation extends Model
         'recommendation_quality',
         'feedback',
         'additional_data',
+        'ai_usage_frequency',
+        'ai_answer_trust',
+        'ai_explanation_preference',
     ];
 
     protected function casts(): array
@@ -29,6 +32,8 @@ class TrustEvaluation extends Model
             'ui_satisfaction' => 'float',
             'recommendation_quality' => 'float',
             'additional_data' => 'array',
+            'ai_answer_trust' => 'float',
+            'ai_explanation_preference' => 'float',
         ];
     }
 

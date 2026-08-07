@@ -27,6 +27,24 @@
     font-family: 'Atkinson Hyperlegible', sans-serif;
 }
 
+.icon-outline-preview {
+    color: inherit;
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: 2px currentColor;
+    text-shadow: none;
+}
+
+.icon-duotone-preview {
+    color: #4f46e5;
+    position: relative;
+    text-shadow: 3px 3px 0 #22d3ee;
+}
+
+.dark .icon-duotone-preview {
+    color: #a5b4fc;
+    text-shadow: 3px 3px 0 #2dd4bf;
+}
+
 @layer base {
     * {
         margin: 0;

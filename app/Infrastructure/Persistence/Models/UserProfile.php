@@ -21,6 +21,9 @@ class UserProfile extends Model
         'visual_preference',
         'context_environment',
         'ai_familiarity',
+        'daily_device_usage',
+        'device_usage_time',
+        'primary_device_purpose',
         'additional_data',
     ];
 
