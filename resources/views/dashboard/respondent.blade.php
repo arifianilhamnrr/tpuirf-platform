@@ -4,6 +4,14 @@
 
 @section('content')
     @php
+        $preferenceLabels = [
+            'blue' => 'Biru', 'green' => 'Hijau', 'purple' => 'Ungu', 'orange' => 'Oranye', 'rose' => 'Rose', 'neutral' => 'Netral',
+            'minimal_flat' => 'Minimal / Datar', 'material_elevated' => 'Material / Berelevasi', 'glassmorphism' => 'Glassmorphism',
+            'neumorphism' => 'Neumorphism', 'high_contrast_brutalist' => 'Neobrutalism',
+        ];
+        $designStyles = $finalPreferences['design_styles'] ?? [];
+        $designSummary = $designStyles ? implode(' · ', array_map(fn ($style) => $preferenceLabels[$style] ?? $style, $designStyles)) : null;
+        $paletteSummary = isset($finalPreferences['color_palette']) ? ($preferenceLabels[$finalPreferences['color_palette']] ?? $finalPreferences['color_palette']) : null;
         $researchStatus = $preferenceExperiment['status'] ?? null;
         $researchActive = in_array($researchStatus, ['in_progress', 'evaluation'], true);
         $researchCompleted = $researchStatus === 'completed';
@@ -42,7 +50,7 @@
                     </div>
                     <h3 class="font-semibold text-gray-800 dark:text-white">Eksperimen</h3>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ $hasActiveExperiment ? '1 Aktif' : '0' }}</p>
+                <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ ($hasActiveExperiment || $researchCompleted) ? '1' : '0' }}</p>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $researchCompleted ? 'Penelitian preferensi selesai' : ($hasActiveExperiment ? 'Eksperimen sedang berlangsung' : 'Tidak ada eksperimen aktif') }}</p>
             </div>
 
@@ -53,8 +61,8 @@
                     </div>
                     <h3 class="font-semibold text-gray-800 dark:text-white">Rekomendasi</h3>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ $recommendation ? $recommendation->recommendedUi : '--' }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $recommendation ? 'Tingkat keyakinan: '.($recommendation->confidenceScore * 100).'%' : 'Belum dibuat' }}</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-white">{{ $designSummary ?? '--' }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $paletteSummary ? 'Palet '.$paletteSummary : 'Selesaikan eksperimen untuk melihatnya' }}</p>
             </div>
 
             <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 border border-white/20 dark:border-gray-700/30 shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -64,8 +72,8 @@
                     </div>
                     <h3 class="font-semibold text-gray-800 dark:text-white">Skor Kepercayaan</h3>
                 </div>
-                <p class="text-3xl font-bold text-gray-800 dark:text-white">--</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Selesaikan evaluasi untuk melihatnya</p>
+                <p class="text-3xl font-bold text-gray-800 dark:text-white">{{ $trustEvaluation?->ai_answer_trust ?? '--' }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $trustEvaluation ? 'Skala kepercayaan 1–5' : 'Selesaikan evaluasi untuk melihatnya' }}</p>
             </div>
         </div>
 

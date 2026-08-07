@@ -8,6 +8,7 @@ use App\Application\Interfaces\ExperimentServiceInterface;
 use App\Application\Interfaces\PreferenceExperimentServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Application\Interfaces\UserProfileServiceInterface;
+use App\Infrastructure\Persistence\Models\TrustEvaluation;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -30,6 +31,11 @@ class DashboardController extends Controller
             ? null
             : $this->experimentService->getCurrentExperiment($user->id);
         $recommendation = $this->recommendationService->getRecommendation($user->id);
+        $finalPreferences = $preferenceExperiment['preferences'] ?? [];
+        $trustEvaluation = TrustEvaluation::query()
+            ->where('user_id', $user->id)
+            ->latest()
+            ->first();
         $profileComplete = $this->userProfileService->isProfileComplete($user->id);
 
         return view('dashboard.respondent', compact(
@@ -37,6 +43,8 @@ class DashboardController extends Controller
             'activeExperiment',
             'preferenceExperiment',
             'recommendation',
+            'finalPreferences',
+            'trustEvaluation',
             'profileComplete',
         ));
     }
