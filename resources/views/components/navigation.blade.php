@@ -4,6 +4,8 @@
         $navItems = match($role) {
             'admin' => [
                 ['label' => 'Dashboard', 'route' => 'admin.dashboard'],
+                ['label' => 'Responden', 'route' => 'admin.respondents'],
+                ['label' => 'Eksperimen', 'route' => 'admin.experiments'],
                 ['label' => 'Analitik', 'route' => 'analytics.index'],
             ],
             'researcher' => [

@@ -1,0 +1,17 @@
+@extends('layouts.app')
+
+@section('title', 'Kelola Eksperimen')
+
+@section('content')
+<div class="space-y-6">
+    <div><p class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Administrasi</p><h1 class="mt-1 text-3xl font-bold text-gray-900 dark:text-white">Eksperimen</h1><p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Pantau progres, tugas, event interaksi, dan hasil pilihan setiap sesi.</p></div>
+    @include('admin._tabs')
+    <div class="flex flex-wrap gap-2">@foreach($statusCounts as $status => $total)<a href="{{ route('admin.experiments', ['status' => $status]) }}" class="rounded-full px-3 py-1.5 text-xs font-semibold {{ request('status') === $status ? 'bg-indigo-600 text-white' : 'bg-white/70 text-gray-700 dark:bg-gray-800/60 dark:text-gray-300' }}">{{ str($status)->replace('_', ' ')->title() }} · {{ $total }}</a>@endforeach</div>
+    <section class="rounded-3xl border border-white/20 bg-white/70 p-6 shadow-xl backdrop-blur-xl dark:border-gray-700/30 dark:bg-gray-800/50">
+        <form class="grid gap-3 sm:grid-cols-[1fr_200px_auto]"><input name="search" value="{{ request('search') }}" placeholder="Cari responden" class="rounded-xl border-gray-200 bg-white/70 text-sm dark:border-gray-600 dark:bg-gray-900/60 dark:text-white"><select name="status" class="rounded-xl border-gray-200 bg-white/70 text-sm dark:border-gray-600 dark:bg-gray-900/60 dark:text-white"><option value="">Semua status</option>@foreach($statusCounts as $status => $total)<option value="{{ $status }}" @selected(request('status') === $status)>{{ str($status)->replace('_', ' ')->title() }} ({{ $total }})</option>@endforeach</select><button class="rounded-xl bg-indigo-600 px-5 text-sm font-semibold text-white">Terapkan</button></form>
+        <div class="mt-5 overflow-x-auto"><table class="w-full min-w-[900px] text-left text-sm"><thead class="border-b text-xs uppercase text-gray-500 dark:border-gray-700"><tr><th class="px-3 py-3">Responden</th><th class="px-3 py-3">Status</th><th class="px-3 py-3">Progres</th><th class="px-3 py-3">Interaksi</th><th class="px-3 py-3">Pilihan</th><th class="px-3 py-3">Waktu</th></tr></thead><tbody class="divide-y divide-gray-100 dark:divide-gray-700/60">
+            @forelse($experiments as $experiment)<tr><td class="px-3 py-4"><p class="font-semibold text-gray-900 dark:text-white">{{ $experiment->user?->name ?? 'Pengguna dihapus' }}</p><p class="font-mono text-[11px] text-gray-400">{{ str($experiment->id)->limit(12) }}</p></td><td class="px-3 py-4"><span class="rounded-full bg-indigo-500/10 px-2.5 py-1 text-xs font-semibold text-indigo-700 dark:text-indigo-300">{{ str($experiment->status)->replace('_', ' ')->title() }}</span></td><td class="px-3 py-4">Langkah {{ $experiment->current_step ?? 0 }}<p class="text-xs text-gray-500">{{ $experiment->tasks_count }} tugas</p></td><td class="px-3 py-4 font-semibold">{{ number_format($experiment->interaction_events_count) }} event</td><td class="px-3 py-4">{{ $experiment->preferred_ui ?? '-' }}</td><td class="px-3 py-4"><p>{{ $experiment->created_at?->format('d M Y H:i') }}</p><p class="text-xs text-gray-500">{{ $experiment->completed_at ? 'Selesai '.$experiment->completed_at->diffForHumans() : 'Aktif '.$experiment->updated_at->diffForHumans() }}</p></td></tr>@empty<tr><td colspan="6" class="px-3 py-10 text-center text-gray-500">Tidak ada eksperimen yang cocok.</td></tr>@endforelse
+        </tbody></table></div><div class="mt-5">{{ $experiments->links() }}</div>
+    </section>
+</div>
+@endsection

@@ -65,8 +65,9 @@ class PreferenceExperimentBackendTest extends TestCase
                 'status' => 'healthy',
                 'model_loaded' => true,
                 'models' => ['random_forest', 'xgboost'],
-                'model_version' => 'rf+xgboost+shap-v2',
+                'model_version' => 'rf+xgboost+shap-multitarget-v3',
                 'accuracy' => 0.88,
+                'targets' => ['theme', 'font_family', 'design_style'],
             ]),
             '*/feature_importance' => Http::response([
                 ['feature' => 'theme', 'importance' => 0.31],
@@ -97,19 +98,32 @@ class PreferenceExperimentBackendTest extends TestCase
     {
         Http::fake([
             '*/predict' => Http::response([
-                'recommended_ui' => 'D',
+                'recommended_ui' => 'minimal_flat',
+                'recommended_config' => [
+                    'theme' => 'dark',
+                    'color_palette' => 'blue',
+                    'font_family' => 'high_legibility',
+                    'font_size' => 'large',
+                    'layout_density' => 'comfortable',
+                    'navigation_position' => 'bottom',
+                    'icon_style' => 'filled',
+                    'design_style' => 'minimal_flat',
+                ],
                 'confidence_score' => 0.87,
+                'confidence_by_target' => ['theme' => 0.91, 'font_family' => 0.84, 'design_style' => 0.86],
                 'shap_values' => [0.42, -0.18],
                 'features' => ['theme', 'font_family'],
                 'explanations' => [
-                    ['feature' => 'theme', 'shap_value' => 0.42, 'impact' => 0.42, 'direction' => 'increases'],
-                    ['feature' => 'font_family', 'shap_value' => -0.18, 'impact' => 0.18, 'direction' => 'decreases'],
+                    ['target' => 'theme', 'recommended_value' => 'dark', 'feature' => 'device_usage_time', 'feature_value' => 'evening', 'shap_value' => 0.42, 'impact' => 0.42, 'direction' => 'increases'],
+                    ['target' => 'font_family', 'recommended_value' => 'high_legibility', 'feature' => 'device_type', 'feature_value' => 'smartphone', 'shap_value' => -0.18, 'impact' => 0.18, 'direction' => 'decreases'],
                 ],
                 'model_outputs' => [
-                    'random_forest' => ['prediction' => 'D', 'confidence' => 0.82],
-                    'xgboost' => ['prediction' => 'D', 'confidence' => 0.92],
+                    'theme' => [
+                        'random_forest' => ['prediction' => 'dark', 'confidence' => 0.82],
+                        'xgboost' => ['prediction' => 'dark', 'confidence' => 0.92],
+                    ],
                 ],
-                'model_version' => 'rf+xgboost+shap-v2',
+                'model_version' => 'rf+xgboost+shap-multitarget-v3',
             ]),
         ]);
         $experiment = $this->startExperiment();
@@ -218,13 +232,23 @@ class PreferenceExperimentBackendTest extends TestCase
         $this->assertDatabaseHas('recommendations', [
             'experiment_id' => $experimentId,
             'user_id' => $this->user->id,
-            'recommended_ui' => 'D',
-            'model_version' => 'rf+xgboost+shap-v2',
+            'recommended_ui' => 'minimal_flat',
+            'model_version' => 'rf+xgboost+shap-multitarget-v3',
         ]);
         $recommendation = $this->user->recommendations()->where('experiment_id', $experimentId)->firstOrFail();
-        $this->assertSame('theme', $recommendation->explanations[0]['feature']);
+        $this->assertSame('device_usage_time', $recommendation->explanations[0]['feature']);
         $this->assertSame('dark', $recommendation->input_features['theme']);
-        $this->assertArrayHasKey('random_forest', $recommendation->model_outputs);
+        $this->assertSame('evening', $recommendation->input_features['device_usage_time']);
+        $this->assertSame('high_legibility', $recommendation->recommended_config['font_family']);
+        $this->assertSame(0.91, $recommendation->confidence_by_target['theme']);
+        $this->assertArrayHasKey('random_forest', $recommendation->model_outputs['theme']);
+
+        $this->get(route('respondent.recommendation.show'))
+            ->assertOk()
+            ->assertSee('Konfigurasi Rekomendasi Model')
+            ->assertSee('Waktu Penggunaan Utama')
+            ->assertSee('Tema')
+            ->assertSee('sore');
         $this->assertDatabaseHas('interaction_events', [
             'experiment_id' => $experimentId,
             'event_type' => 'experiment_completed',

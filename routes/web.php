@@ -63,11 +63,17 @@ Route::middleware(['auth.session'])->group(function () {
     Route::middleware([RoleMiddleware::class.':admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'admin'])->name('dashboard');
         Route::get('/researchers', [AdminController::class, 'manageResearchers'])->name('researchers');
+        Route::post('/researchers', [AdminController::class, 'createResearcher'])->name('researchers.store');
         Route::get('/respondents', [AdminController::class, 'manageRespondents'])->name('respondents');
+        Route::patch('/users/{user}/status', [AdminController::class, 'toggleUserStatus'])->name('users.status');
         Route::get('/experiments', [AdminController::class, 'manageExperiments'])->name('experiments');
         Route::get('/templates', [AdminController::class, 'manageTemplates'])->name('templates');
+        Route::put('/templates/{template}', [AdminController::class, 'updateTemplate'])->name('templates.update');
+        Route::patch('/templates/{template}/status', [AdminController::class, 'toggleTemplate'])->name('templates.status');
         Route::get('/logs', [AdminController::class, 'manageLogs'])->name('logs');
         Route::get('/configuration', [AdminController::class, 'configuration'])->name('configuration');
+        Route::post('/configuration', [AdminController::class, 'createConfiguration'])->name('configuration.store');
+        Route::put('/configuration/{configuration}', [AdminController::class, 'updateConfiguration'])->name('configuration.update');
         Route::post('/model/train', [AdminController::class, 'trainModel'])->name('model.train');
     });
 

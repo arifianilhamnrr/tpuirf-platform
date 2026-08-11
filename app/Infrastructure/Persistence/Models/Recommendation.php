@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Persistence\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Recommendation extends Model
@@ -14,7 +14,9 @@ class Recommendation extends Model
         'user_id',
         'experiment_id',
         'recommended_ui',
+        'recommended_config',
         'confidence_score',
+        'confidence_by_target',
         'shap_values',
         'features',
         'explanations',
@@ -26,6 +28,8 @@ class Recommendation extends Model
     protected function casts(): array
     {
         return [
+            'recommended_config' => 'array',
+            'confidence_by_target' => 'array',
             'shap_values' => 'array',
             'features' => 'array',
             'explanations' => 'array',

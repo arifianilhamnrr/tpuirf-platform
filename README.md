@@ -168,7 +168,7 @@ Aplikasi tersedia secara default di `http://127.0.0.1:8000`.
 
 ### Menjalankan Service ML
 
-Service Python terintegrasi menjalankan ensemble Random Forest dan XGBoost. SHAP menghitung kontribusi fitur terhadap setiap rekomendasi.
+Service Python menjalankan ensemble Random Forest dan XGBoost secara terpisah untuk delapan target rekomendasi: tema, palet warna, font, ukuran font, kepadatan layout, posisi navigasi, gaya ikon, dan gaya desain. SHAP menghitung kontribusi fitur profil/perilaku terhadap setiap hasil.
 
 ```bash
 python3 -m venv python/.venv
@@ -182,9 +182,9 @@ Tambahkan URL service ke `.env`:
 ML_SERVICE_URL=http://127.0.0.1:5000
 ```
 
-Ketika eksperimen selesai, Laravel otomatis mengirim profil, preferensi UI, dan metrik interaksi ke service ML. Prediksi kedua model, confidence, input, serta penjelasan SHAP disimpan di tabel `recommendations`. Dashboard admin menyediakan status model, feature importance, prediksi terbaru, dan tombol **Latih Model**.
+Ketika eksperimen selesai, Laravel otomatis mengirim profil responden, waktu penggunaan perangkat (misalnya aktif pagi atau malam), tujuan penggunaan, dan metrik interaksi ke service ML. Konfigurasi hasil model, prediksi kedua algoritma, confidence per target, input, serta penjelasan SHAP kontekstual disimpan di tabel `recommendations`. Pilihan UI responden hanya menjadi label training dan tidak digunakan sebagai fitur prediksi untuk mencegah target leakage. Dashboard admin menyediakan status model, target yang sudah aktif, feature importance, prediksi terbaru, dan tombol **Latih Model**.
 
-Dataset training memerlukan minimal dua kelas target. Untuk protokol preferensi, gaya desain utama yang dipilih responden digunakan sebagai target; tema, palet, tipografi, layout, navigasi, ikon, profil, dan interaksi digunakan sebagai fitur.
+Setiap target memerlukan minimal dua kelas dan sedikitnya dua sampel pada setiap kelas. Target yang belum memenuhi syarat dilewati sementara; aplikasi menggunakan fallback yang transparan sampai data cukup, sedangkan target lain yang sudah cukup tetap dapat dilatih. Untuk hasil penelitian yang stabil, gunakan jumlah responden yang jauh lebih besar daripada batas teknis minimum tersebut.
 
 Untuk menghasilkan aset produksi:
 

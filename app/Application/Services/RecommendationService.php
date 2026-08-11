@@ -2,8 +2,8 @@
 
 namespace App\Application\Services;
 
-use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Application\Interfaces\DatasetExportServiceInterface;
+use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Domain\DTOs\RecommendationDTO;
 use App\Domain\Repositories\RecommendationRepositoryInterface;
 use App\Domain\Repositories\UserProfileRepositoryInterface;
@@ -55,6 +55,10 @@ class RecommendationService implements RecommendationServiceInterface
             if (! isset($result['recommended_ui'], $result['confidence_score'])) {
                 throw new RuntimeException('Respons ML tidak lengkap.');
             }
+            $result['recommended_config'] = array_replace(
+                $this->fallbackConfig($input),
+                $result['recommended_config'] ?? [],
+            );
         } catch (\Throwable $exception) {
             report($exception);
             $result = $this->fallbackResult($input);
@@ -124,6 +128,9 @@ class RecommendationService implements RecommendationServiceInterface
             'visual_preference' => $profile?->visualPreference,
             'context_environment' => $profile?->contextEnvironment,
             'ai_familiarity' => $profile?->aiFamiliarity,
+            'daily_device_usage' => $profile?->dailyDeviceUsage,
+            'device_usage_time' => $profile?->deviceUsageTime,
+            'primary_device_purpose' => $profile?->primaryDevicePurpose,
             'click_count' => $events->where('event_type', 'component_clicked')->count(),
             'scroll_count' => $events->where('event_type', 'scroll_ended')->count(),
             'hover_count' => $events->where('event_type', 'component_hovered')->count(),
@@ -147,7 +154,9 @@ class RecommendationService implements RecommendationServiceInterface
             'user_id' => $userId,
             'experiment_id' => $experimentId,
             'recommended_ui' => (string) $result['recommended_ui'],
+            'recommended_config' => $result['recommended_config'] ?? null,
             'confidence_score' => (float) $result['confidence_score'],
+            'confidence_by_target' => $result['confidence_by_target'] ?? null,
             'shap_values' => $result['shap_values'] ?? null,
             'features' => $result['features'] ?? null,
             'explanations' => $result['explanations'] ?? null,
@@ -165,17 +174,37 @@ class RecommendationService implements RecommendationServiceInterface
 
     private function fallbackResult(array $input): array
     {
+        $recommendedConfig = $this->fallbackConfig($input);
+
         return [
-            'recommended_ui' => explode('|', (string) ($input['design_style'] ?? ''))[0] ?: match ($input['visual_preference'] ?? null) {
+            'recommended_ui' => $recommendedConfig['design_style'] ?? match ($input['visual_preference'] ?? null) {
                 'minimal' => 'minimal_flat', 'vibrant' => 'high_contrast_brutalist', 'classic' => 'material_elevated', default => 'minimal_flat',
             },
+            'recommended_config' => $recommendedConfig,
             'confidence_score' => 0,
+            'confidence_by_target' => [],
             'shap_values' => [],
             'features' => [],
             'explanations' => [],
             'model_outputs' => ['status' => 'ml_service_unavailable'],
-            'model_version' => 'fallback-no-shap',
+            'model_version' => 'fallback-untrained-model',
         ];
+    }
+
+    private function fallbackConfig(array $input): array
+    {
+        $config = [
+            'theme' => $input['theme'] ?? null,
+            'color_palette' => $input['color_palette'] ?? null,
+            'font_family' => $input['font_family'] ?? null,
+            'font_size' => $input['font_size'] ?? null,
+            'layout_density' => $input['layout_density'] ?? null,
+            'navigation_position' => $input['navigation_position'] ?? null,
+            'icon_style' => $input['icon_style'] ?? null,
+            'design_style' => explode('|', (string) ($input['design_style'] ?? ''))[0] ?: null,
+        ];
+
+        return array_filter($config, static fn ($value) => $value !== null && $value !== '');
     }
 
     private function modelRequest(string $path): array

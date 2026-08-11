@@ -1,0 +1,16 @@
+[Unit]
+Description=Cloudflare Tunnel for TPUIRF Platform
+After=network-online.target nginx.service php8.4-fpm.service
+Wants=network-online.target
+Requires=nginx.service php8.4-fpm.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+ExecStart=/usr/local/bin/cloudflared --no-autoupdate tunnel --config /home/ubuntu/.cloudflared/config-tpuirf-platform.yml run 9b300337-408b-47b8-8ae1-81cf5127bc97
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

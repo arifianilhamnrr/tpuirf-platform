@@ -18,41 +18,48 @@
             'orange' => 'Oranye', 'rose' => 'Rose', 'neutral' => 'Netral',
         ];
         $preferenceValue = fn ($value) => $preferenceLabels[$value] ?? $value ?? '-';
+        $recommendedConfig = $recommendation?->recommendedConfig ?? [];
+        $usingFallback = str_starts_with($recommendation?->modelVersion ?? '', 'fallback-');
     @endphp
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Hasil Preferensi Desain Anda</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-2">Konfigurasi ini dirangkum dari pilihan dan perilaku interaksi Anda selama eksperimen.</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Rekomendasi Antarmuka Anda</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Konfigurasi dihitung dari profil, kebiasaan penggunaan, dan perilaku interaksi selama eksperimen.</p>
         </div>
 
         <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
-            @if($preferenceExperiment && !empty($finalPreferences))
+            @if($recommendation && !empty($recommendedConfig))
                 <div class="flex flex-col sm:flex-row sm:items-center gap-5">
                     <div class="w-24 h-24 shrink-0 rounded-3xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center shadow-2xl shadow-indigo-500/20">
                         <span class="text-3xl font-bold text-white">UI</span>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Antarmuka hasil pilihan Anda</h2>
-                        <p class="mt-1 text-gray-500 dark:text-gray-400">Gaya dan warna ini digunakan sebagai konfigurasi akhir desain.</p>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Konfigurasi Rekomendasi Model</h2>
+                            <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $usingFallback ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' }}">{{ $usingFallback ? 'Ringkasan sementara' : 'Prediksi AI' }}</span>
+                        </div>
+                        <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $usingFallback ? 'Model belum memiliki data training yang cukup; sementara ini sistem memakai pilihan akhir Anda.' : 'Random Forest dan XGBoost menyepakati rekomendasi berikut dengan penjelasan SHAP.' }}</p>
                         <div class="mt-3 flex flex-wrap gap-2 text-sm">
-                            @foreach(($finalPreferences['design_styles'] ?? []) as $style)
-                                <span class="rounded-full bg-indigo-500/10 px-3 py-1 font-medium text-indigo-700 dark:text-indigo-300">{{ $preferenceValue($style) }}</span>
-                            @endforeach
-                            @if(!empty($finalPreferences['color_palette']))
-                                <span class="rounded-full bg-cyan-500/10 px-3 py-1 font-medium text-cyan-700 dark:text-cyan-300">Palet {{ $preferenceValue($finalPreferences['color_palette']) }}</span>
+                            @if(!empty($recommendedConfig['design_style']))
+                                <span class="rounded-full bg-indigo-500/10 px-3 py-1 font-medium text-indigo-700 dark:text-indigo-300">{{ $preferenceValue($recommendedConfig['design_style']) }}</span>
                             @endif
+                            @if(!empty($recommendedConfig['color_palette']))
+                                <span class="rounded-full bg-cyan-500/10 px-3 py-1 font-medium text-cyan-700 dark:text-cyan-300">Palet {{ $preferenceValue($recommendedConfig['color_palette']) }}</span>
+                            @endif
+                            <span class="rounded-full bg-gray-500/10 px-3 py-1 font-medium text-gray-600 dark:text-gray-300">Confidence {{ number_format($recommendation->confidenceScore * 100, 1) }}%</span>
                         </div>
                     </div>
                 </div>
                 <div class="mt-8 grid gap-3 sm:grid-cols-2">
                     @foreach([
-                        'Tema' => $finalPreferences['theme'] ?? null,
-                        'Palet Warna' => $finalPreferences['color_palette'] ?? null,
-                        'Tipografi' => $finalPreferences['font_family'] ?? null,
-                        'Ukuran Font' => $finalPreferences['font_size'] ?? null,
-                        'Kepadatan Layout' => $finalPreferences['layout_density'] ?? null,
-                        'Navigasi' => $finalPreferences['navigation_position'] ?? null,
-                        'Gaya Ikon' => $finalPreferences['icon_style'] ?? null,
+                        'Tema' => $recommendedConfig['theme'] ?? null,
+                        'Palet Warna' => $recommendedConfig['color_palette'] ?? null,
+                        'Tipografi' => $recommendedConfig['font_family'] ?? null,
+                        'Ukuran Font' => $recommendedConfig['font_size'] ?? null,
+                        'Kepadatan Layout' => $recommendedConfig['layout_density'] ?? null,
+                        'Navigasi' => $recommendedConfig['navigation_position'] ?? null,
+                        'Gaya Ikon' => $recommendedConfig['icon_style'] ?? null,
+                        'Gaya Desain' => $recommendedConfig['design_style'] ?? null,
                     ] as $label => $value)
                         <div class="rounded-2xl bg-gray-50 dark:bg-gray-900/60 p-4">
                             <p class="text-xs uppercase tracking-wide text-gray-500">{{ $label }}</p>
@@ -62,20 +69,33 @@
                 </div>
             @else
                 <div class="text-center">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Belum ada hasil eksperimen</h2>
-                    <p class="mt-2 text-gray-500 dark:text-gray-400">Selesaikan eksperimen preferensi untuk melihat konfigurasi desain akhir Anda.</p>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Belum ada rekomendasi</h2>
+                    <p class="mt-2 text-gray-500 dark:text-gray-400">Selesaikan eksperimen agar sistem dapat membaca profil dan pola interaksi Anda.</p>
                 </div>
             @endif
         </div>
 
+        @if($preferenceExperiment && !empty($finalPreferences))
+            <div class="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-xl dark:border-gray-700/30 dark:bg-gray-800/40">
+                <h2 class="font-bold text-gray-800 dark:text-white">Pilihan akhir Anda sebagai data penelitian</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data ini menjadi label pembelajaran model dan ditampilkan terpisah dari hasil rekomendasi.</p>
+                <div class="mt-4 flex flex-wrap gap-2 text-sm">
+                    @foreach(($finalPreferences['design_styles'] ?? []) as $style)
+                        <span class="rounded-full bg-gray-500/10 px-3 py-1 text-gray-700 dark:text-gray-300">{{ $preferenceValue($style) }}</span>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         @if(!empty($explanations))
             <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-6">Mengapa UI Ini?</h2>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Mengapa UI Ini Direkomendasikan?</h2>
+                <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Nilai berikut adalah kontribusi model, bukan hubungan sebab-akibat. Faktor dengan dampak terbesar ditampilkan lebih dahulu.</p>
                 <div class="space-y-4">
                     @foreach($explanations as $explanation)
                         <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/5 to-cyan-500/5 border border-indigo-500/10">
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-gray-800 dark:text-white">{{ $explanation['feature'] }}</h3>
+                                <div><p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">{{ $explanation['target_label'] ?? 'Antarmuka' }} · {{ $explanation['recommended_value_label'] ?? '-' }}</p><h3 class="font-semibold text-gray-800 dark:text-white">{{ $explanation['feature'] }}</h3></div>
                                 <span class="px-3 py-1 rounded-xl text-xs font-medium" 
                                     style="background: {{ $explanation['shap_value'] > 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)' }}; color: {{ $explanation['shap_value'] > 0 ? '#22C55E' : '#EF4444' }}">
                                     {{ $explanation['direction'] == 'increases' ? '+' : '-' }}{{ number_format($explanation['impact'], 3) }}

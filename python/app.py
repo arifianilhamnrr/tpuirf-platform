@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from ml_pipeline import TPUIRFPipeline
+from ml_pipeline import MODEL_VERSION, TPUIRFPipeline
 import os
 
 app = Flask(__name__)
@@ -9,7 +9,7 @@ try:
     pipeline.load_model()
     print("Model loaded successfully")
 except Exception:
-    print("No trained model found. Please train first.")
+    print("No compatible trained model found. Please train first.")
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -17,6 +17,8 @@ def predict():
     try:
         result = pipeline.predict(data)
         return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 422
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -35,6 +37,8 @@ def train():
     try:
         result = pipeline.train(data_path)
         return jsonify(result)
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 422
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -42,8 +46,10 @@ def train():
 def accuracy():
     return jsonify({
         'accuracy': pipeline.metrics.get('accuracy', 0),
-        'models': list(pipeline.models.keys()),
-        'model_version': 'rf+xgboost+shap-v2',
+        'models': ['random_forest', 'xgboost'] if pipeline.models else [],
+        'targets': list(pipeline.models.keys()),
+        'target_metrics': pipeline.metrics.get('target_metrics', {}),
+        'model_version': MODEL_VERSION,
     })
 
 @app.route('/feature_importance', methods=['GET'])
@@ -57,8 +63,11 @@ def health():
     return jsonify({
         'status': 'healthy',
         'model_loaded': bool(pipeline.models),
-        'models': list(pipeline.models.keys()),
-        'model_version': 'rf+xgboost+shap-v2',
+        'models': ['random_forest', 'xgboost'] if pipeline.models else [],
+        'targets': list(pipeline.models.keys()),
+        'target_metrics': pipeline.metrics.get('target_metrics', {}),
+        'skipped_targets': pipeline.metrics.get('skipped_targets', {}),
+        'model_version': MODEL_VERSION,
         'accuracy': pipeline.metrics.get('accuracy'),
     })
 

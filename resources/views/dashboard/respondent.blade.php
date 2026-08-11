@@ -9,9 +9,13 @@
             'minimal_flat' => 'Minimal / Datar', 'material_elevated' => 'Material / Berelevasi', 'glassmorphism' => 'Glassmorphism',
             'neumorphism' => 'Neumorphism', 'high_contrast_brutalist' => 'Neobrutalism',
         ];
-        $designStyles = $finalPreferences['design_styles'] ?? [];
+        $recommendedConfig = $recommendation?->recommendedConfig ?? [];
+        $designStyles = !empty($recommendedConfig['design_style'])
+            ? [$recommendedConfig['design_style']]
+            : ($finalPreferences['design_styles'] ?? []);
         $designSummary = $designStyles ? implode(' · ', array_map(fn ($style) => $preferenceLabels[$style] ?? $style, $designStyles)) : null;
-        $paletteSummary = isset($finalPreferences['color_palette']) ? ($preferenceLabels[$finalPreferences['color_palette']] ?? $finalPreferences['color_palette']) : null;
+        $palette = $recommendedConfig['color_palette'] ?? ($finalPreferences['color_palette'] ?? null);
+        $paletteSummary = $palette ? ($preferenceLabels[$palette] ?? $palette) : null;
         $researchStatus = $preferenceExperiment['status'] ?? null;
         $researchActive = in_array($researchStatus, ['in_progress', 'evaluation'], true);
         $researchCompleted = $researchStatus === 'completed';
