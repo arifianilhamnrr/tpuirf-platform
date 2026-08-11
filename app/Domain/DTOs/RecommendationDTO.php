@@ -12,6 +12,9 @@ class RecommendationDTO
         public readonly float $confidenceScore,
         public readonly ?array $shapValues,
         public readonly ?array $features,
+        public readonly ?array $explanations,
+        public readonly ?array $modelOutputs,
+        public readonly ?array $inputFeatures,
         public readonly ?string $modelVersion,
         public readonly ?string $createdAt,
     ) {}
@@ -26,6 +29,9 @@ class RecommendationDTO
             confidenceScore: $data['confidence_score'],
             shapValues: $data['shap_values'] ?? null,
             features: $data['features'] ?? null,
+            explanations: $data['explanations'] ?? null,
+            modelOutputs: $data['model_outputs'] ?? null,
+            inputFeatures: $data['input_features'] ?? null,
             modelVersion: $data['model_version'] ?? null,
             createdAt: $data['created_at'] ?? null,
         );
@@ -41,6 +47,9 @@ class RecommendationDTO
             'confidence_score' => $this->confidenceScore,
             'shap_values' => $this->shapValues,
             'features' => $this->features,
+            'explanations' => $this->explanations,
+            'model_outputs' => $this->modelOutputs,
+            'input_features' => $this->inputFeatures,
             'model_version' => $this->modelVersion,
             'created_at' => $this->createdAt,
         ];

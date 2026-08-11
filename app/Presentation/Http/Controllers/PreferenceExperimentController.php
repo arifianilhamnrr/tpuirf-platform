@@ -3,6 +3,7 @@
 namespace App\Presentation\Http\Controllers;
 
 use App\Application\Interfaces\PreferenceExperimentServiceInterface;
+use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Presentation\Http\Requests\InteractionEventBatchRequest;
 use App\Presentation\Http\Requests\StartPreferenceExperimentRequest;
 use App\Presentation\Http\Requests\TaskSelectionRequest;
@@ -16,6 +17,7 @@ class PreferenceExperimentController extends Controller
 {
     public function __construct(
         private readonly PreferenceExperimentServiceInterface $experimentService,
+        private readonly RecommendationServiceInterface $recommendationService,
     ) {}
 
     public function start(StartPreferenceExperimentRequest $request): JsonResponse|RedirectResponse
@@ -103,6 +105,7 @@ class PreferenceExperimentController extends Controller
             $this->userId($request),
             $experimentId,
         );
+        $this->recommendationService->generateForExperiment($this->userId($request), $experimentId);
 
         return response()->json(['data' => $experiment]);
     }

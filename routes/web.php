@@ -68,6 +68,7 @@ Route::middleware(['auth.session'])->group(function () {
         Route::get('/templates', [AdminController::class, 'manageTemplates'])->name('templates');
         Route::get('/logs', [AdminController::class, 'manageLogs'])->name('logs');
         Route::get('/configuration', [AdminController::class, 'configuration'])->name('configuration');
+        Route::post('/model/train', [AdminController::class, 'trainModel'])->name('model.train');
     });
 
     Route::middleware([RoleMiddleware::class.':researcher,admin'])->group(function () {

@@ -73,6 +73,7 @@ Event dikirim secara batch dan disimpan sementara di browser apabila pengiriman 
 - OpenSpout untuk ekspor XLSX
 - PHPUnit 12
 - Python untuk modul analisis dan machine learning tambahan
+- Random Forest, XGBoost, dan SHAP untuk rekomendasi yang dapat dijelaskan
 
 ## Persyaratan Sistem
 
@@ -84,6 +85,7 @@ Pastikan perangkat memiliki:
 - MySQL 8+ atau MariaDB;
 - Node.js `^20.19.0` atau `>=22.12.0`;
 - npm.
+- Python 3.11 atau lebih baru.
 
 Periksa ekstensi `intl` dengan:
 
@@ -164,6 +166,26 @@ npm run dev
 
 Aplikasi tersedia secara default di `http://127.0.0.1:8000`.
 
+### Menjalankan Service ML
+
+Service Python terintegrasi menjalankan ensemble Random Forest dan XGBoost. SHAP menghitung kontribusi fitur terhadap setiap rekomendasi.
+
+```bash
+python3 -m venv python/.venv
+python/.venv/bin/pip install -r python/requirements.txt
+python/.venv/bin/gunicorn --chdir python --bind 127.0.0.1:5000 app:app
+```
+
+Tambahkan URL service ke `.env`:
+
+```dotenv
+ML_SERVICE_URL=http://127.0.0.1:5000
+```
+
+Ketika eksperimen selesai, Laravel otomatis mengirim profil, preferensi UI, dan metrik interaksi ke service ML. Prediksi kedua model, confidence, input, serta penjelasan SHAP disimpan di tabel `recommendations`. Dashboard admin menyediakan status model, feature importance, prediksi terbaru, dan tombol **Latih Model**.
+
+Dataset training memerlukan minimal dua kelas target. Untuk protokol preferensi, gaya desain utama yang dipilih responden digunakan sebagai target; tema, palet, tipografi, layout, navigasi, ikon, profil, dan interaksi digunakan sebagai fitur.
+
 Untuk menghasilkan aset produksi:
 
 ```bash
@@ -175,7 +197,7 @@ npm run build
 Konfigurasi utama berada di [`config/experiment.php`](config/experiment.php). Nilai berikut dapat diubah melalui `.env`:
 
 ```dotenv
-EXPERIMENT_PROTOCOL_VERSION=TPUIRF-PREF-v3
+EXPERIMENT_PROTOCOL_VERSION=TPUIRF-PREF-v4
 EXPERIMENT_CONSENT_VERSION=1.0
 EXPERIMENT_IDLE_THRESHOLD_SECONDS=30
 EXPERIMENT_MAX_EVENT_BATCH_SIZE=100
@@ -229,6 +251,7 @@ tests/Feature/            # Pengujian alur dan backend penelitian
 - `interaction_events`: event interaksi mentah;
 - `participant_preferences`: konfigurasi preferensi akhir;
 - `trust_evaluations`: penilaian dan umpan balik akhir;
+- `recommendations`: output Random Forest/XGBoost, input model, confidence, dan penjelasan SHAP;
 - `user_profiles`: karakteristik responden.
 
 ## Ekspor Dataset

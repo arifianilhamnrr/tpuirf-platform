@@ -9,6 +9,7 @@ use App\Application\Interfaces\PreferenceExperimentServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Application\Interfaces\UserProfileServiceInterface;
 use App\Infrastructure\Persistence\Models\TrustEvaluation;
+use App\Infrastructure\Persistence\Models\Recommendation;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -59,7 +60,14 @@ class DashboardController extends Controller
     public function admin(): View
     {
         $stats = $this->analyticsService->getDashboardStats();
+        $modelStatus = $this->recommendationService->getModelStatus();
+        $featureImportance = array_slice($this->recommendationService->getFeatureImportance(), 0, 8);
+        $recentPredictions = Recommendation::query()
+            ->with('user:id,name')
+            ->latest()
+            ->limit(10)
+            ->get();
 
-        return view('dashboard.admin', compact('stats'));
+        return view('dashboard.admin', compact('stats', 'modelStatus', 'featureImportance', 'recentPredictions'));
     }
 }

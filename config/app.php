@@ -10,6 +10,8 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'ml_service_url' => env('ML_SERVICE_URL', 'http://127.0.0.1:5000'),
+
     'timezone' => 'UTC',
 
     'locale' => env('APP_LOCALE', 'en'),

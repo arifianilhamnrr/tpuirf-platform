@@ -8,7 +8,7 @@ pipeline = TPUIRFPipeline()
 try:
     pipeline.load_model()
     print("Model loaded successfully")
-except:
+except Exception:
     print("No trained model found. Please train first.")
 
 @app.route('/predict', methods=['POST'])
@@ -31,7 +31,7 @@ def explain():
 
 @app.route('/train', methods=['POST'])
 def train():
-    data_path = request.json.get('data_path', os.path.join(os.path.dirname(__file__), '..', 'storage', 'app', 'exports', 'full_dataset.csv'))
+    data_path = (request.json or {}).get('data_path', os.path.join(os.path.dirname(__file__), '..', 'storage', 'app', 'exports', 'full_dataset.csv'))
     try:
         result = pipeline.train(data_path)
         return jsonify(result)
@@ -40,20 +40,27 @@ def train():
 
 @app.route('/accuracy', methods=['GET'])
 def accuracy():
-    return jsonify({'accuracy': getattr(pipeline.model, 'score', lambda: 0)})
+    return jsonify({
+        'accuracy': pipeline.metrics.get('accuracy', 0),
+        'models': list(pipeline.models.keys()),
+        'model_version': 'rf+xgboost+shap-v2',
+    })
 
 @app.route('/feature_importance', methods=['GET'])
 def feature_importance():
-    if pipeline.model is None:
+    if not pipeline.models:
         return jsonify({'error': 'Model not trained'}), 400
-    importances = pipeline.model.feature_importances_
-    features = [{'feature': name, 'importance': float(imp)} for name, imp in zip(pipeline.feature_names, importances)]
-    features.sort(key=lambda x: x['importance'], reverse=True)
-    return jsonify(features)
+    return jsonify(pipeline.feature_importance())
 
 @app.route('/health', methods=['GET'])
 def health():
-    return jsonify({'status': 'healthy', 'model_loaded': pipeline.model is not None})
+    return jsonify({
+        'status': 'healthy',
+        'model_loaded': bool(pipeline.models),
+        'models': list(pipeline.models.keys()),
+        'model_version': 'rf+xgboost+shap-v2',
+        'accuracy': pipeline.metrics.get('accuracy'),
+    })
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

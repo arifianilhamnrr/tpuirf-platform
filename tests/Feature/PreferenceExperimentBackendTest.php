@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Infrastructure\Persistence\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -57,8 +58,60 @@ class PreferenceExperimentBackendTest extends TestCase
             ->assertJsonPath('data.status', 'in_progress');
     }
 
+    public function test_admin_dashboard_monitors_integrated_models_and_shap_outputs(): void
+    {
+        Http::fake([
+            '*/health' => Http::response([
+                'status' => 'healthy',
+                'model_loaded' => true,
+                'models' => ['random_forest', 'xgboost'],
+                'model_version' => 'rf+xgboost+shap-v2',
+                'accuracy' => 0.88,
+            ]),
+            '*/feature_importance' => Http::response([
+                ['feature' => 'theme', 'importance' => 0.31],
+                ['feature' => 'font_family', 'importance' => 0.22],
+            ]),
+        ]);
+        $admin = User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@example.test',
+            'password' => 'secret-password',
+            'role' => 'admin',
+            'date_of_birth' => '1990-01-01',
+            'is_active' => true,
+        ]);
+
+        $this->withSession([
+            'user_id' => $admin->id,
+            'user_role' => 'admin',
+            'user_name' => $admin->name,
+        ])->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Random Forest + XGBoost + SHAP')
+            ->assertSee('Model aktif')
+            ->assertSee('Theme');
+    }
+
     public function test_it_persists_all_preferences_evaluation_and_completion(): void
     {
+        Http::fake([
+            '*/predict' => Http::response([
+                'recommended_ui' => 'D',
+                'confidence_score' => 0.87,
+                'shap_values' => [0.42, -0.18],
+                'features' => ['theme', 'font_family'],
+                'explanations' => [
+                    ['feature' => 'theme', 'shap_value' => 0.42, 'impact' => 0.42, 'direction' => 'increases'],
+                    ['feature' => 'font_family', 'shap_value' => -0.18, 'impact' => 0.18, 'direction' => 'decreases'],
+                ],
+                'model_outputs' => [
+                    'random_forest' => ['prediction' => 'D', 'confidence' => 0.82],
+                    'xgboost' => ['prediction' => 'D', 'confidence' => 0.92],
+                ],
+                'model_version' => 'rf+xgboost+shap-v2',
+            ]),
+        ]);
         $experiment = $this->startExperiment();
         $experimentId = $experiment['id'];
         $selections = [
@@ -162,6 +215,16 @@ class PreferenceExperimentBackendTest extends TestCase
             'experiment_id' => $experimentId,
             'event_type' => 'evaluation_submitted',
         ]);
+        $this->assertDatabaseHas('recommendations', [
+            'experiment_id' => $experimentId,
+            'user_id' => $this->user->id,
+            'recommended_ui' => 'D',
+            'model_version' => 'rf+xgboost+shap-v2',
+        ]);
+        $recommendation = $this->user->recommendations()->where('experiment_id', $experimentId)->firstOrFail();
+        $this->assertSame('theme', $recommendation->explanations[0]['feature']);
+        $this->assertSame('dark', $recommendation->input_features['theme']);
+        $this->assertArrayHasKey('random_forest', $recommendation->model_outputs);
         $this->assertDatabaseHas('interaction_events', [
             'experiment_id' => $experimentId,
             'event_type' => 'experiment_completed',

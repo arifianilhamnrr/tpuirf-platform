@@ -290,6 +290,8 @@ class DatasetExportService implements DatasetExportServiceInterface
             'context_environment', 'ai_familiarity',
             'click_count', 'scroll_count', 'hover_count', 'keyboard_count',
             'avg_task_time', 'total_session_time',
+            'theme', 'color_palette', 'font_family', 'font_size',
+            'layout_density', 'navigation_position', 'icon_style', 'design_style',
             'preferred_ui', 'trust_score', 'transparency_score',
         ];
 
@@ -303,19 +305,18 @@ class DatasetExportService implements DatasetExportServiceInterface
                     continue;
                 }
 
-                $logs = $this->logRepository->findByExperimentId($experiment->id);
+                $events = InteractionEvent::query()->where('experiment_id', $experiment->id)->get();
                 $trustEval = $this->trustRepository->findByExperimentId($experiment->id);
+                $preference = ParticipantPreference::query()->where('experiment_id', $experiment->id)->first();
 
-                $clickCount = count(array_filter($logs, fn ($l) => $l->eventType === 'click'));
-                $scrollCount = count(array_filter($logs, fn ($l) => $l->eventType === 'scroll'));
-                $hoverCount = count(array_filter($logs, fn ($l) => $l->eventType === 'hover'));
-                $keyboardCount = count(array_filter($logs, fn ($l) => $l->eventType === 'keyboard'));
-
-                $taskTimes = array_filter(array_map(fn ($l) => $l->taskTime, $logs));
-                $avgTaskTime = count($taskTimes) > 0 ? array_sum($taskTimes) / count($taskTimes) : 0;
-
-                $sessionTimes = array_filter(array_map(fn ($l) => $l->sessionTime, $logs));
-                $totalSessionTime = count($sessionTimes) > 0 ? max($sessionTimes) : 0;
+                $clickCount = $events->where('event_type', 'component_clicked')->count();
+                $scrollCount = $events->where('event_type', 'scroll_ended')->count();
+                $hoverCount = $events->where('event_type', 'component_hovered')->count();
+                $keyboardCount = $events->where('input_method', 'keyboard')->count();
+                $avgTaskTime = (float) ExperimentTask::query()
+                    ->where('experiment_id', $experiment->id)
+                    ->avg('active_duration_ms');
+                $totalSessionTime = (int) ($events->max('elapsed_experiment_ms') ?? 0);
 
                 $rows[] = [
                     $profile->userId,
@@ -334,7 +335,15 @@ class DatasetExportService implements DatasetExportServiceInterface
                     $keyboardCount,
                     round($avgTaskTime, 2),
                     round($totalSessionTime, 2),
-                    $experiment->preferredUi,
+                    $preference?->theme,
+                    $preference?->color_palette,
+                    $preference?->font_family,
+                    $preference?->font_size,
+                    $preference?->layout_density,
+                    $preference?->navigation_position,
+                    $preference?->icon_style,
+                    $preference?->design_style,
+                    explode('|', (string) $preference?->design_style)[0] ?: $experiment->preferredUi,
                     $trustEval['trust_score'] ?? null,
                     $trustEval['transparency_score'] ?? null,
                 ];

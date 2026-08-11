@@ -17,6 +17,9 @@ class Recommendation extends Model
         'confidence_score',
         'shap_values',
         'features',
+        'explanations',
+        'model_outputs',
+        'input_features',
         'model_version',
     ];
 
@@ -25,6 +28,9 @@ class Recommendation extends Model
         return [
             'shap_values' => 'array',
             'features' => 'array',
+            'explanations' => 'array',
+            'model_outputs' => 'array',
+            'input_features' => 'array',
             'confidence_score' => 'float',
         ];
     }

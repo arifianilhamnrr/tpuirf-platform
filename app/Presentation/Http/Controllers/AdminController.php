@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Presentation\Http\Controllers;
+use App\Application\Interfaces\RecommendationServiceInterface;
 
 use App\Domain\Repositories\ExperimentRepositoryInterface;
 use App\Domain\Repositories\InteractionLogRepositoryInterface;
@@ -20,6 +21,7 @@ class AdminController extends Controller
         private readonly ExperimentRepositoryInterface $experimentRepository,
         private readonly UiTemplateRepositoryInterface $uiTemplateRepository,
         private readonly InteractionLogRepositoryInterface $logRepository,
+        private readonly RecommendationServiceInterface $recommendationService,
     ) {}
 
     public function manageResearchers(): View
@@ -72,5 +74,15 @@ class AdminController extends Controller
     public function updateConfiguration(Request $request): RedirectResponse
     {
         return redirect()->back()->with('success', 'Konfigurasi berhasil diperbarui.');
+    }
+
+    public function trainModel(): RedirectResponse
+    {
+        $trained = $this->recommendationService->trainModel();
+
+        return redirect()->route('admin.dashboard')->with(
+            $trained ? 'success' : 'error',
+            $trained ? 'Model Random Forest dan XGBoost berhasil dilatih.' : 'Training gagal. Pastikan service Python dan dataset tersedia.',
+        );
     }
 }

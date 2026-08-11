@@ -20,6 +20,16 @@ class ExplainabilityService implements ExplainabilityServiceInterface
             return [];
         }
 
+        if ($recommendation->explanations) {
+            return array_map(function (array $explanation): array {
+                $feature = $explanation['feature'] ?? 'unknown';
+
+                return $explanation + [
+                    'human_readable' => $this->makeHumanReadable($feature, (float) ($explanation['shap_value'] ?? 0)),
+                ];
+            }, $recommendation->explanations);
+        }
+
         $shapValues = $recommendation->shapValues;
         $features = $recommendation->features;
 
@@ -42,6 +52,14 @@ class ExplainabilityService implements ExplainabilityServiceInterface
             'click_rate' => 'Tingkat Klik',
             'scroll_depth' => 'Kedalaman Gulir',
             'task_time' => 'Waktu Penyelesaian Tugas',
+            'theme' => 'Tema',
+            'color_palette' => 'Palet Warna',
+            'font_family' => 'Keluarga Font',
+            'font_size' => 'Ukuran Font',
+            'layout_density' => 'Kepadatan Layout',
+            'navigation_position' => 'Posisi Navigasi',
+            'icon_style' => 'Gaya Ikon',
+            'design_style' => 'Gaya Desain',
         ];
 
         foreach ($features as $index => $feature) {
@@ -104,6 +122,14 @@ class ExplainabilityService implements ExplainabilityServiceInterface
             'click_rate' => "Perilaku klik Anda $strength memengaruhi rekomendasi UI",
             'scroll_depth' => "Pola gulir Anda $strength memengaruhi rekomendasi tata letak",
             'task_time' => "Kecepatan penyelesaian tugas Anda $strength menentukan kepadatan antarmuka yang direkomendasikan",
+            'theme' => "Pilihan tema Anda $strength memengaruhi rekomendasi antarmuka",
+            'color_palette' => "Palet warna yang dipilih $strength memengaruhi rekomendasi antarmuka",
+            'font_family' => "Pilihan keluarga font Anda $strength memengaruhi rekomendasi antarmuka",
+            'font_size' => "Ukuran font pilihan Anda $strength memengaruhi rekomendasi antarmuka",
+            'layout_density' => "Kepadatan layout pilihan Anda $strength memengaruhi rekomendasi antarmuka",
+            'navigation_position' => "Posisi navigasi pilihan Anda $strength memengaruhi rekomendasi antarmuka",
+            'icon_style' => "Gaya ikon pilihan Anda $strength memengaruhi rekomendasi antarmuka",
+            'design_style' => "Gaya desain pilihan Anda $strength memengaruhi rekomendasi antarmuka",
         ];
 
         return $templates[$feature] ?? "Fitur '$feature' $strength memengaruhi rekomendasi";
