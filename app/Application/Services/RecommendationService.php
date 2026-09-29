@@ -76,6 +76,8 @@ class RecommendationService implements RecommendationServiceInterface
 
     public function trainModel(): bool
     {
+        $dataPath = null;
+
         try {
             $dataPath = $this->datasetExportService->exportCsv('full');
 
@@ -84,6 +86,10 @@ class RecommendationService implements RecommendationServiceInterface
                 ->successful();
         } catch (\Throwable) {
             return false;
+        } finally {
+            if ($dataPath && file_exists($dataPath)) {
+                @unlink($dataPath);
+            }
         }
     }
 

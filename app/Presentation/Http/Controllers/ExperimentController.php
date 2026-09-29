@@ -5,6 +5,7 @@ namespace App\Presentation\Http\Controllers;
 use App\Application\Interfaces\AuthServiceInterface;
 use App\Application\Interfaces\ExperimentServiceInterface;
 use App\Application\Interfaces\InteractionLoggerServiceInterface;
+use App\Application\Interfaces\RecommendationServiceInterface;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ class ExperimentController extends Controller
         private readonly ExperimentServiceInterface $experimentService,
         private readonly AuthServiceInterface $authService,
         private readonly InteractionLoggerServiceInterface $loggerService,
+        private readonly RecommendationServiceInterface $recommendationService,
     ) {}
 
     public function start(): RedirectResponse
@@ -98,6 +100,8 @@ class ExperimentController extends Controller
         $experiment = $this->experimentService->getCurrentExperiment($user->id);
 
         $this->experimentService->completeExperiment($experiment->id);
+        $this->recommendationService->trainModel();
+        $this->recommendationService->generateRecommendation($user->id);
 
         return redirect()->route('respondent.experiment.complete');
     }

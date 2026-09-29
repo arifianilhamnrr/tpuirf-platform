@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify
 from ml_pipeline import MODEL_VERSION, TPUIRFPipeline
 import os
+import threading
 
 app = Flask(__name__)
 pipeline = TPUIRFPipeline()
+train_lock = threading.Lock()
 
 try:
     pipeline.load_model()
@@ -34,13 +36,14 @@ def explain():
 @app.route('/train', methods=['POST'])
 def train():
     data_path = (request.json or {}).get('data_path', os.path.join(os.path.dirname(__file__), '..', 'storage', 'app', 'exports', 'full_dataset.csv'))
-    try:
-        result = pipeline.train(data_path)
-        return jsonify(result)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 422
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    with train_lock:
+        try:
+            result = pipeline.train(data_path)
+            return jsonify(result)
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 422
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
 @app.route('/accuracy', methods=['GET'])
 def accuracy():

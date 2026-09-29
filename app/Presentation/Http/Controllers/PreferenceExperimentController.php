@@ -105,6 +105,7 @@ class PreferenceExperimentController extends Controller
             $this->userId($request),
             $experimentId,
         );
+        $this->recommendationService->trainModel();
         $this->recommendationService->generateForExperiment($this->userId($request), $experimentId);
 
         return response()->json(['data' => $experiment]);

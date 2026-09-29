@@ -97,6 +97,7 @@ class PreferenceExperimentBackendTest extends TestCase
     public function test_it_persists_all_preferences_evaluation_and_completion(): void
     {
         Http::fake([
+            '*/train' => Http::response(['status' => 'trained', 'accuracy' => 0.85]),
             '*/predict' => Http::response([
                 'recommended_ui' => 'minimal_flat',
                 'recommended_config' => [
@@ -213,6 +214,8 @@ class PreferenceExperimentBackendTest extends TestCase
         ]))
             ->assertOk()
             ->assertJsonPath('data.status', 'completed');
+
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/train'));
 
         $this->assertDatabaseHas('trust_evaluations', [
             'experiment_id' => $experimentId,
