@@ -1,0 +1,50 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.web
+    container_name: tpuirf_web
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      - APP_NAME=TPUIRF
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - APP_URL=https://tpuirf.projectar.web.id
+      - DB_CONNECTION=sqlite
+      - SESSION_DRIVER=database
+      - QUEUE_CONNECTION=database
+      - CACHE_STORE=database
+      - ML_SERVICE_URL=http://ml:5000
+      - GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxLB-B-iW1Wlri4imCrGQrEEO99XAAsX2ye2d061uSWAvtiCPDZQ1-LgI6QT0xsZiks/exec
+    volumes:
+      - tpuirf_storage:/var/www/html/storage
+      - tpuirf_db:/var/www/html/database
+    depends_on:
+      - ml
+
+  ml:
+    build:
+      context: ./python
+      dockerfile: ../deploy/docker/Dockerfile.ml
+    container_name: tpuirf_ml
+    restart: unless-stopped
+    volumes:
+      - tpuirf_storage:/var/www/html/storage
+      - tpuirf_ml_models:/app/models
+
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: tpuirf_tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      - web
+
+volumes:
+  tpuirf_storage:
+  tpuirf_db:
+  tpuirf_ml_models:
