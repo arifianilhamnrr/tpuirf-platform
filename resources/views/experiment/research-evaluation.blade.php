@@ -87,7 +87,7 @@ function researchEvaluation() {
                 const completion = await fetch(@js(route('respondent.preference-experiment.complete', $experiment['id'])), { method: 'POST', headers });
                 const completionResult = await completion.json();
                 if (!completion.ok) throw new Error(completionResult.message || 'Eksperimen tidak dapat diselesaikan.');
-                window.location.href = @js(route('respondent.preference-experiment.complete.page', $experiment['id']));
+                window.location.href = completionResult.redirect_url || @js(route('respondent.recommendation.show'));
             } catch (error) {
                 this.error = error.message;
                 this.submitting = false;

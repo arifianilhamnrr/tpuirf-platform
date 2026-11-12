@@ -4,6 +4,8 @@ namespace App\Presentation\Http\Controllers;
 
 use App\Application\Interfaces\PreferenceExperimentServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
+use App\Application\Interfaces\ExplainabilityServiceInterface;
+use App\Application\Jobs\SyncExperimentToGoogleSheetsJob;
 use App\Presentation\Http\Requests\InteractionEventBatchRequest;
 use App\Presentation\Http\Requests\StartPreferenceExperimentRequest;
 use App\Presentation\Http\Requests\TaskSelectionRequest;
@@ -18,6 +20,7 @@ class PreferenceExperimentController extends Controller
     public function __construct(
         private readonly PreferenceExperimentServiceInterface $experimentService,
         private readonly RecommendationServiceInterface $recommendationService,
+        private readonly ExplainabilityServiceInterface $explainabilityService,
     ) {}
 
     public function start(StartPreferenceExperimentRequest $request): JsonResponse|RedirectResponse
@@ -101,14 +104,32 @@ class PreferenceExperimentController extends Controller
 
     public function complete(Request $request, string $experimentId): JsonResponse
     {
+        $userId = $this->userId($request);
         $experiment = $this->experimentService->complete(
-            $this->userId($request),
+            $userId,
             $experimentId,
         );
-        $this->recommendationService->trainModel();
-        $this->recommendationService->generateForExperiment($this->userId($request), $experimentId);
 
-        return response()->json(['data' => $experiment]);
+        $this->recommendationService->trainModel();
+        $recommendation = $this->recommendationService->generateForExperiment($userId, $experimentId);
+
+        $explanations = [];
+        if ($recommendation->id) {
+            try {
+                $explanations = $this->explainabilityService->getExplanation($recommendation->id);
+            } catch (\Throwable) {}
+        }
+
+        $recData = $recommendation->toArray();
+        $recData['explanations'] = $explanations;
+
+        // Sync hasil eksperimen & ML ke Google Sheets di background queue
+        SyncExperimentToGoogleSheetsJob::dispatch($userId, $experimentId, $recData);
+
+        return response()->json([
+            'data' => $experiment,
+            'redirect_url' => route('respondent.recommendation.show'),
+        ]);
     }
 
     private function userId(Request $request): string

@@ -42,7 +42,10 @@
         </div>
 
         <div class="mt-8 text-sm text-gray-500 dark:text-gray-400">Durasi aktif tercatat: {{ number_format(($experiment['total_active_duration_ms'] ?? 0) / 1000, 1) }} detik</div>
-        <a href="{{ route('respondent.dashboard') }}" class="mt-6 inline-flex px-8 py-3.5 rounded-2xl bg-indigo-600 text-white font-semibold">Kembali ke Dashboard</a>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+            <a href="{{ route('respondent.recommendation.show') }}" class="inline-flex px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold shadow-lg shadow-indigo-500/25 hover:from-indigo-700 hover:to-cyan-600 transition-all">Lihat Analisis AI & SHAP</a>
+            <a href="{{ route('respondent.dashboard') }}" class="inline-flex px-8 py-3.5 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">Kembali ke Dashboard</a>
+        </div>
     </div>
 </div>
 @endsection
