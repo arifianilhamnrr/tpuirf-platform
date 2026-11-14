@@ -240,6 +240,10 @@ class ExplainabilityService implements ExplainabilityServiceInterface
             'compact' => 'Rapat', 'comfortable' => 'Sedang', 'spacious' => 'Renggang',
             'outline' => 'Outline', 'filled' => 'Filled', 'duotone' => 'Dual Tone',
             'high_school' => 'High School', 'bachelor' => 'S1 / Sarjana', 'master' => 'S2 / Magister',
+            'education' => 'pendidikan', 'productivity' => 'produktivitas', 'entertainment' => 'hiburan',
+            'communication' => 'komunikasi', 'shopping' => 'belanja', 'finance' => 'keuangan',
+            'social_media' => 'media sosial', 'coding' => 'pemrograman', 'design' => 'desain',
+            'research' => 'riset & penelitian', 'study' => 'belajar',
         ][(string) $value] ?? str((string) $value)->replace('_', ' ')->toString();
     }
 }
