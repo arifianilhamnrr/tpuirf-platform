@@ -140,7 +140,6 @@ class DummyResearchDataSeeder extends Seeder
                     'current_ui_version' => 'D',
                     'preferred_ui' => $d['design_styles'][0],
                     'total_active_duration_ms' => rand(45000, 95000),
-                    'total_idle_duration_ms' => rand(2000, 8000),
                     'started_at' => now()->subHours(2),
                     'completed_at' => now()->subHours(1),
                 ]
