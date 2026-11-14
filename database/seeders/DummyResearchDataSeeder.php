@@ -218,6 +218,7 @@ class DummyResearchDataSeeder extends Seeder
             // Seed sample interaction events
             for ($ev = 1; $ev <= 8; $ev++) {
                 InteractionEvent::create([
+                    'event_uuid' => (string) Str::uuid(),
                     'experiment_id' => $experiment->id,
                     'task_key' => 'design_style',
                     'sequence_number' => $ev,
