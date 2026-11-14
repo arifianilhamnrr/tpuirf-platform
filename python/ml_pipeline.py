@@ -390,16 +390,82 @@ class TPUIRFPipeline:
         value_label = self.VALUE_LABELS.get(str(feature_value), str(feature_value or "tidak tersedia"))
         recommendation_label = self.VALUE_LABELS.get(recommendation, recommendation)
 
-        if direction == "increases":
-            human_readable = (
-                f"Data {feature_label} Anda ({value_label}) mendukung rekomendasi "
-                f"{target_label} {recommendation_label} menurut pola yang dipelajari model."
-            )
+        val = str(feature_value or "")
+        val_label = value_label
+        if abs(shap_value) < 0.001:
+            if feature == "age":
+                field_label = f"Untuk usia Anda ({val} tahun)" if val else "Faktor usia Anda"
+            elif feature == "gender":
+                field_label = f"Data jenis kelamin ({val_label})" if val else "Data jenis kelamin"
+            elif feature == "education":
+                field_label = f"Latar belakang pendidikan ({val_label})" if val else "Latar belakang pendidikan"
+            elif feature == "occupation":
+                field_label = f"Data pekerjaan ({val})" if val else "Data pekerjaan"
+            else:
+                field_label = f"Faktor {feature_label}"
+            human_readable = f"{field_label} bersifat netral dan tidak memengaruhi penentuan {target_label} {recommendation_label}."
+        elif shap_value > 0:
+            if feature == "age":
+                if target == "icon_style":
+                    human_readable = f"Di rentang usia Anda ({val} tahun), gaya ikon {recommendation_label} terbukti paling disukai karena memberikan kesan bersih, modern, dan tidak membuat layar terasa penuh."
+                elif target == "font_size":
+                    human_readable = f"Faktor usia Anda ({val} tahun) selaras dengan ukuran teks {recommendation_label} agar keterbacaan tetap optimal dan nyaman di mata."
+                elif target == "navigation_position":
+                    human_readable = f"Karakteristik usia Anda ({val} tahun) sangat cocok dengan tata letak {recommendation_label} yang ergonomis."
+                else:
+                    human_readable = f"Rentang usia Anda ({val} tahun) memberikan kesesuaian tinggi terhadap pilihan {target_label} {recommendation_label}."
+            elif feature == "digital_literacy":
+                if target == "font_family":
+                    human_readable = f"Dengan tingkat literasi digital Anda yang tinggi (skor {val}), jenis huruf {recommendation_label} sangat direkomendasikan karena dirancang khusus untuk keterbacaan tajam pada layar digital dan antarmuka modern."
+                elif target == "layout_density":
+                    human_readable = f"Tingkat literasi digital Anda (skor {val}) memudahkan Anda memindai banyak informasi sekaligus, sehingga tata letak {recommendation_label} dipilih agar lebih efisien tanpa banyak scrolling."
+                else:
+                    human_readable = f"Tingkat pemahaman teknologi Anda (skor {val}) mendukung pemilihan {target_label} {recommendation_label} untuk navigasi yang lebih leluasa."
+            elif feature == "visual_preference":
+                if target == "icon_style":
+                    human_readable = f"Pilihan gaya visual {val_label} Anda sangat selaras dengan ikon {recommendation_label} yang minimalis dan rapi."
+                elif target == "font_size":
+                    human_readable = f"Untuk mendukung gaya visual {val_label} pilihan Anda, ukuran huruf {recommendation_label} memberikan keseimbangan terbaik antara estetika ruang kosong dan kemudahan membaca."
+                elif target == "layout_density":
+                    human_readable = f"Gaya visual {val_label} yang Anda sukai sangat cocok dipadukan dengan tata letak {recommendation_label} yang presisi dan terorganisir."
+                else:
+                    human_readable = f"Preferensi visual {val_label} Anda berpadu serasi dengan {target_label} {recommendation_label}."
+            elif feature == "primary_device_purpose":
+                if target == "navigation_position":
+                    human_readable = f"Karena Anda sering menggunakan perangkat untuk kebutuhan {val_label}, menu di {recommendation_label} sangat membantu Anda berpindah antar-konten atau fitur belajar dengan lebih terstruktur."
+                else:
+                    human_readable = f"Aktivitas utama Anda untuk {val_label} menjadikan {target_label} {recommendation_label} pilihan paling fungsional."
+            elif feature == "device_usage_time":
+                if target == "font_family":
+                    human_readable = f"Untuk kebiasaan penggunaan di waktu {val_label}, huruf {recommendation_label} memiliki proporsi spasi yang nyaman sehingga mata tidak cepat lelah saat kondisi cahaya mulai berubah."
+                else:
+                    human_readable = f"Kebiasaan berinteraksi di waktu {val_label} sangat cocok dipadukan dengan {target_label} {recommendation_label} untuk kenyamanan visual."
+            elif feature == "education":
+                human_readable = f"Latar belakang pendidikan Anda ({val_label}) menunjukkan kecenderungan alur navigasi yang lebih nyaman dan familiar dengan tata letak {recommendation_label}."
+            elif feature in ["avg_task_time", "total_session_time"]:
+                time_str = f"{round(float(feature_value)/1000, 1)} detik" if float(feature_value or 0) > 1000 else f"{feature_value} ms"
+                human_readable = f"Efisiensi waktu interaksi Anda ({time_str}) memberikan indikasi kuat bahwa {target_label} {recommendation_label} membuat alur kerja Anda lebih lancar."
+            else:
+                human_readable = f"Karakteristik {feature_label} Anda ({val_label}) selaras dengan pemilihan {target_label} {recommendation_label}."
         else:
-            human_readable = (
-                f"Data {feature_label} Anda ({value_label}) sedikit mengurangi keyakinan pada "
-                f"{target_label} {recommendation_label}; kombinasi faktor lain memberi dukungan lebih kuat."
-            )
+            time_str = f"{round(float(feature_value)/1000, 1)} detik" if feature in ["avg_task_time", "total_session_time"] and float(feature_value or 0) > 1000 else (f"{feature_value} ms" if feature in ["avg_task_time", "total_session_time"] else val_label)
+            if feature in ["avg_task_time", "total_session_time"]:
+                if target == "font_size":
+                    human_readable = f"Kecepatan waktu penyelesaian tugas Anda ({time_str}) sebenarnya cenderung lebih cocok untuk ukuran teks yang sedikit berbeda, namun faktor kenyamanan lain membuat ukuran {recommendation_label} tetap menjadi pilihan paling seimbang."
+                elif target == "font_family":
+                    human_readable = f"Pola kecepatan interaksi Anda ({time_str}) sedikit mengurangi kecocokan pada huruf {recommendation_label}, tetapi keunggulan keterbacaannya di faktor lain tetap menjadikannya pilihan utama."
+                elif target == "layout_density":
+                    human_readable = f"Waktu penyelesaian tugas Anda ({time_str}) memberi sedikit catatan agar tampilan tidak terlalu padat, namun dorongan dari tingkat literasi digital Anda membuat layout {recommendation_label} tetap dipertahankan."
+                elif target == "icon_style":
+                    human_readable = f"Kecepatan interaksi Anda ({time_str}) memberi pengaruh yang sangat kecil terhadap ikon {recommendation_label}, sehingga tidak mengubah rekomendasi utama."
+                else:
+                    human_readable = f"Durasi interaksi Anda ({time_str}) memberi sedikit koreksi pada {target_label}, namun tetap paling stabil di konfigurasi {recommendation_label}."
+            elif feature == "occupation":
+                human_readable = f"Sebagai {val}, Anda sebenarnya kerap berhadapan dengan teks padat yang kadang lebih pas dengan opsi lain, namun opsi {target_label} {recommendation_label} tetap dipilih agar nyaman untuk penggunaan umum."
+            elif feature == "age":
+                human_readable = f"Faktor usia Anda ({val} tahun) sedikit mengarah pada preferensi alternatif, tetapi kebutuhan aktivitas utama Anda membuat {target_label} {recommendation_label} jauh lebih optimal."
+            else:
+                human_readable = f"Karakteristik {feature_label} Anda ({time_str}) memberi sedikit catatan pada {target_label}, namun kombinasi faktor kenyamanan lainnya memberi dukungan lebih dominan."
 
         return {
             "target": target,

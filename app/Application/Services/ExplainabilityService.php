@@ -94,8 +94,7 @@ class ExplainabilityService implements ExplainabilityServiceInterface
             'recommended_value_label' => $this->valueLabel($recommendedValue),
             'impact' => (float) ($explanation['impact'] ?? abs($shapValue)),
             'direction' => $explanation['direction'] ?? ($shapValue >= 0 ? 'increases' : 'decreases'),
-            'human_readable' => $explanation['human_readable']
-                ?? $this->makeHumanReadable($feature, $shapValue, $target, $recommendedValue, $featureValue),
+            'human_readable' => $this->makeHumanReadable($feature, $shapValue, $target, $recommendedValue, $featureValue),
         ]);
     }
 
