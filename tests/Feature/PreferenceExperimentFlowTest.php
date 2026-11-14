@@ -95,6 +95,56 @@ class PreferenceExperimentFlowTest extends TestCase
             ->assertSee('elapsed_experiment_ms', false);
     }
 
+    public function test_final_design_task_keeps_preview_and_tracking_contracts(): void
+    {
+        $experiment = $this->postJson(route('respondent.preference-experiment.start'), [
+            'consent_accepted' => true,
+            'consent_version' => config('experiment.consent_version'),
+        ])->assertOk()->json('data');
+
+        $selections = [
+            'theme' => ['selected_option' => 'light'],
+            'typography' => ['selection_payload' => ['font_family' => 'sans', 'font_size' => 'medium']],
+            'layout_density' => ['selected_option' => 'comfortable'],
+            'navigation_position' => ['selected_option' => 'top'],
+            'icon_style' => ['selected_option' => 'outline'],
+        ];
+
+        foreach ($selections as $taskKey => $selection) {
+            $this->postJson(route('respondent.preference-experiment.tasks.select', [
+                'experimentId' => $experiment['id'],
+                'taskKey' => $taskKey,
+            ]), [
+                ...$selection,
+                'active_duration_ms' => 100,
+            ])->assertOk();
+        }
+
+        $task = $this->respondent->experiments()->findOrFail($experiment['id'])
+            ->tasks()->where('task_key', 'design_style')->sole();
+        $response = $this->get(route('respondent.preference-experiment.tasks.page', [
+            'experimentId' => $experiment['id'],
+            'taskKey' => 'design_style',
+        ]))->assertOk();
+
+        $this->assertEqualsCanonicalizing(config('experiment.tasks.design_style.options'), $task->option_order);
+
+        foreach ($task->option_order as $style) {
+            foreach (['accordion', 'live-preview', 'primary-action', 'fullscreen', 'select'] as $component) {
+                $response->assertSee("data-track-component=\"design-{$style}-{$component}\"", false);
+            }
+        }
+
+        foreach (['blue', 'green', 'purple', 'orange', 'rose', 'neutral'] as $palette) {
+            $response->assertSee("data-track-component=\"palette-{$palette}\"", false);
+        }
+
+        $response
+            ->assertSee('data-track-component="task-submit"', false)
+            ->assertSee('compactSurfaceClass', false)
+            ->assertSee('fullscreenSurfaceClass', false);
+    }
+
     public function test_dashboard_resumes_the_new_preference_experiment(): void
     {
         $experiment = $this->postJson(route('respondent.preference-experiment.start'), [

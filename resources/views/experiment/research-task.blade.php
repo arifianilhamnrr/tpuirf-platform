@@ -206,16 +206,6 @@
         </div>
         <div class="space-y-4">
             @foreach($task['option_order'] as $option)
-                @php
-                    $surface = match($option) {
-                        'glassmorphism' => 'bg-white/30 backdrop-blur-xl border border-white/60 shadow-xl',
-                        'neumorphism' => 'bg-slate-200 border-0 shadow-[10px_10px_24px_#b8c0cc,-10px_-10px_24px_#ffffff]',
-                        'material_elevated' => 'bg-white border-0 shadow-xl',
-                         'high_contrast_brutalist' => 'tpuirf-palette-accent border-4 border-black shadow-[7px_7px_0_#000]',
-                        default => 'bg-white border-2 border-slate-200 shadow-none',
-                    };
-                    $buttonStyle = $option === 'high_contrast_brutalist' ? 'bg-black text-white border-2 border-black rounded-none' : ($option === 'neumorphism' ? 'bg-slate-200 tpuirf-palette-primary-text shadow-[inset_3px_3px_6px_#b8c0cc,inset_-3px_-3px_6px_#ffffff]' : 'tpuirf-palette-primary text-white');
-                @endphp
                 <section class="rounded-3xl border-2 overflow-hidden bg-white/70 dark:bg-gray-800/60 transition" :class="isStyleSelected('{{ $option }}') ? 'border-emerald-500 ring-4 ring-emerald-500/10' : 'border-gray-200 dark:border-gray-700'">
                     <button type="button" class="w-full flex items-center justify-between gap-4 p-5 text-left" @click="togglePreview('{{ $option }}')" data-track-component="design-{{ $option }}-accordion" data-option-id="{{ $option }}" :aria-expanded="expandedStyle === '{{ $option }}'">
                         <div><h2 class="font-bold text-gray-900 dark:text-white">{{ $labels[$option] }}</h2><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $descriptions[$option] }}</p></div>
@@ -227,10 +217,10 @@
                             <div class="flex" :class="combinedPreferences.navigation_position === 'left' ? '' : 'flex-col'">
                                 <div x-show="combinedPreferences.navigation_position === 'left'" class="w-24 shrink-0 p-3 space-y-5 text-center text-xs" :class="compactNavigationClass('{{ $option }}')"><strong>Ruang Kerja</strong><p>Beranda</p><p>Proyek</p><p>Aktivitas</p></div>
                                 <div class="flex-1" :class="combinedDensityClass()">
-                                    <div class="flex justify-between items-center"><strong>Ruang kerja kreatif</strong><span class="text-xs opacity-60">Pratinjau gabungan</span></div>
+                                    <div class="flex justify-between items-center"><strong>Ruang kerja kreatif</strong><span class="text-xs opacity-75">Pratinjau gabungan</span></div>
                                     <div class="grid sm:grid-cols-2" :class="combinedGridGapClass()">
-                                        <div class="p-4" :class="compactSurfaceClass('{{ $option }}', true)"><p class="text-sm opacity-60">Proyek aktif</p><p class="text-3xl font-bold mt-2">12</p></div>
-                                        <div class="p-4" :class="compactSurfaceClass('{{ $option }}', true)"><p class="text-sm opacity-60">Progres tim</p><p class="text-3xl font-bold mt-2">76%</p></div>
+                                        <div class="p-4" :class="compactSurfaceClass('{{ $option }}', true)"><p class="text-sm opacity-75">Proyek aktif</p><p class="text-3xl font-bold mt-2">12</p></div>
+                                        <div class="p-4" :class="compactSurfaceClass('{{ $option }}', true)"><p class="text-sm opacity-75">Progres tim</p><p class="text-3xl font-bold mt-2">76%</p></div>
                                     </div>
                                     <div class="mt-5 flex flex-wrap gap-3">
                                         <button type="button" class="px-5 py-3" :class="compactButtonClass('{{ $option }}', true)" data-track-component="design-{{ $option }}-primary-action" data-option-id="{{ $option }}">Tindakan utama</button>
@@ -249,7 +239,7 @@
             <div class="flex items-start justify-between gap-4"><div><h2 class="font-bold text-gray-900 dark:text-white">Pilih palet warna</h2><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Palet ini akan diterapkan pada konfigurasi gaya desain akhir.</p></div><span class="text-sm font-semibold text-indigo-600 dark:text-indigo-400" x-text="selectedPalette ? optionLabel(selectedPalette) : 'Belum dipilih'"></span></div>
             <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
                 @foreach($paletteDetails as $paletteKey => $palette)
-                    <button type="button" @click="choosePalette('{{ $paletteKey }}')" data-track-component="palette-{{ $paletteKey }}" data-option-id="{{ $paletteKey }}" class="rounded-2xl border-2 p-2 text-left transition hover:-translate-y-0.5" :class="selectedPalette === '{{ $paletteKey }}' ? 'border-indigo-500 ring-4 ring-indigo-500/15' : 'border-gray-200 dark:border-gray-700'"><div class="h-16 rounded-xl bg-gradient-to-br {{ $palette['classes'] }} p-2 text-xs font-semibold text-white">{{ $palette['label'] }}</div><div class="mt-2 flex gap-1">@foreach($palette['swatches'] as $swatch)<span class="h-2 flex-1 rounded-full" style="background-color: {{ $swatch }}"></span>@endforeach</div></button>
+                    <button type="button" @click="choosePalette('{{ $paletteKey }}')" data-track-component="palette-{{ $paletteKey }}" data-option-id="{{ $paletteKey }}" class="rounded-2xl border-2 p-2 text-left transition hover:-translate-y-0.5" :class="selectedPalette === '{{ $paletteKey }}' ? 'border-indigo-500 ring-4 ring-indigo-500/15' : 'border-gray-200 dark:border-gray-700'"><div class="h-16 rounded-xl bg-gradient-to-br {{ $palette['classes'] }} p-2 text-xs font-semibold"><span class="inline-flex rounded-md bg-white/90 px-2 py-1 text-slate-900 shadow-sm">{{ $palette['label'] }}</span></div><div class="mt-2 flex gap-1">@foreach($palette['swatches'] as $swatch)<span class="h-2 flex-1 rounded-full" style="background-color: {{ $swatch }}"></span>@endforeach</div></button>
                 @endforeach
             </div>
         </section>
@@ -259,7 +249,7 @@
                 <header class="sticky top-0 z-50 min-h-18 shrink-0" :class="fullscreenNavigationClass()">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center gap-3">
                         <button x-show="combinedPreferences.navigation_position === 'left'" type="button" aria-label="Buka atau tutup navigasi" class="w-11 h-11 shrink-0 flex items-center justify-center text-xl" :class="fullscreenIconButtonClass()" @click="sidebarOpen = !sidebarOpen" data-track-component="fullscreen-sidebar-toggle">☰</button>
-                        <div class="min-w-0"><strong class="block text-base sm:text-lg">TPUIRF Workspace</strong><span class="block text-xs opacity-60 truncate" x-text="optionLabel(fullscreenStyle)"></span></div>
+                        <div class="min-w-0"><strong class="block text-base sm:text-lg">TPUIRF Workspace</strong><span class="block text-xs opacity-75 truncate" x-text="optionLabel(fullscreenStyle)"></span></div>
                         <nav x-show="combinedPreferences.navigation_position === 'top'" class="order-3 sm:order-none w-full sm:w-auto sm:ml-auto flex items-center gap-1 overflow-x-auto rounded-xl border border-current/10 bg-black/5 p-1 dark:bg-white/5"><template x-for="item in ['Beranda', 'Proyek', 'Aktivitas', 'Profil']" :key="item"><button type="button" class="min-w-[105px] shrink-0 px-3 py-2 flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold transition-colors" :class="fullscreenNavItemClass(item)" @click="activateDemoNav(item)" :data-track-component="`fullscreen-nav-${item.toLowerCase()}`"><i :class="combinedIconClass() + ' ' + demoIcon(item)"></i><span class="truncate" x-text="item"></span></button></template></nav>
                         <button type="button" aria-label="Tutup pratinjau layar penuh" class="w-11 h-11 shrink-0 ml-auto flex items-center justify-center text-xl" :class="fullscreenIconButtonClass()" @click="closeFullscreen()">×</button>
                     </div>
@@ -267,24 +257,24 @@
 
                 <div x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition.opacity class="fixed inset-0 top-[72px] z-30 bg-slate-950/30 lg:hidden" @click="sidebarOpen = false"></div>
                 <aside x-show="combinedPreferences.navigation_position === 'left' && sidebarOpen" x-transition class="fixed left-0 top-[72px] bottom-0 z-40 w-72 overflow-y-auto p-5" :class="fullscreenNavigationClass()">
-                    <p class="px-3 text-xs font-semibold uppercase tracking-[.18em] opacity-50">Menu Utama</p>
+                    <p class="px-3 text-xs font-semibold uppercase tracking-[.18em] opacity-75">Menu Utama</p>
                     <nav class="mt-5 space-y-3"><template x-for="item in ['Beranda', 'Proyek', 'Aktivitas', 'Profil']" :key="item">                    <button type="button" class="w-full px-4 py-3 text-left flex items-center gap-3" :class="fullscreenNavItemClass(item)" @click="activateDemoNav(item)" :data-track-component="`fullscreen-nav-${item.toLowerCase()}`"><i class="text-xl w-6 text-center" :class="combinedIconClass() + ' ' + demoIcon(item)"></i><span class="block w-full truncate text-center" x-text="item"></span></button></template></nav>
-                    <div class="mt-8 p-4" :class="fullscreenSurfaceClass()"><p class="text-xs opacity-60">Penyimpanan tim</p><div class="mt-3 h-2 overflow-hidden rounded-full bg-black/10"><div class="h-full w-2/3 bg-current opacity-60"></div></div><p class="mt-2 text-xs">6,4 GB dari 10 GB</p></div>
+                    <div class="mt-8 p-4" :class="fullscreenSurfaceClass()"><p class="text-xs opacity-75">Penyimpanan tim</p><div class="mt-3 h-2 overflow-hidden rounded-full bg-black/10"><div class="h-full w-2/3 bg-current opacity-75"></div></div><p class="mt-2 text-xs">6,4 GB dari 10 GB</p></div>
                 </aside>
 
                  <main class="flex-1 transition-[margin]" :class="[combinedDensityClass(), combinedPreferences.navigation_position === 'left' && sidebarOpen ? 'lg:ml-72' : '', combinedPreferences.navigation_position === 'bottom' ? 'pb-32' : '']">
                     <div class="max-w-7xl mx-auto">
-                        <div><p class="text-sm opacity-55" x-text="demoActiveNav + ' · Ringkasan hari ini'"></p><h2 class="mt-1 text-2xl sm:text-4xl font-bold">Selamat datang di ruang kerja Anda</h2><p class="mt-2 max-w-2xl opacity-70">Pantau eksperimen, baca insight terbaru, dan kelola pekerjaan tim dalam satu tempat.</p></div>
+                        <div><p class="text-sm opacity-75" x-text="demoActiveNav + ' · Ringkasan hari ini'"></p><h2 class="mt-1 text-2xl sm:text-4xl font-bold">Selamat datang di ruang kerja Anda</h2><p class="mt-2 max-w-2xl opacity-90">Pantau eksperimen, baca insight terbaru, dan kelola pekerjaan tim dalam satu tempat.</p></div>
                         <div class="mt-6 flex flex-col sm:flex-row gap-3"><label class="flex-1"><span class="sr-only">Cari proyek</span><input type="search" class="w-full px-4 py-3" :class="fullscreenInputClass()" placeholder="Cari proyek, artikel, atau anggota tim..." @input.debounce.400ms="showDemoToast('Hasil pencarian diperbarui')"></label><button type="button" class="px-5 py-3 font-semibold" :class="fullscreenButtonClass(true)" @click="openDemoModal('Buat Proyek Baru')">+ Proyek Baru</button></div>
-                        <div class="grid grid-cols-2 xl:grid-cols-4" :class="combinedGridGapClass()"><template x-for="stat in [{label:'Proyek aktif',value:'12'}, {label:'Tugas selesai',value:'84'}, {label:'Anggota tim',value:'18'}, {label:'Progres',value:'76%'}]" :key="stat.label"><button type="button" class="text-left" :class="[fullscreenSurfaceClass(), combinedCardPaddingClass()]" @click="openDemoModal(stat.label)"><p class="text-xs sm:text-sm opacity-60" x-text="stat.label"></p><p class="mt-2 text-2xl sm:text-3xl font-bold" x-text="stat.value"></p><p class="mt-3 text-xs" :class="fullscreenTextActionClass()">Lihat detail</p></button></template></div>
+                        <div class="grid grid-cols-2 xl:grid-cols-4" :class="combinedGridGapClass()"><template x-for="stat in [{label:'Proyek aktif',value:'12'}, {label:'Tugas selesai',value:'84'}, {label:'Anggota tim',value:'18'}, {label:'Progres',value:'76%'}]" :key="stat.label"><button type="button" class="text-left" :class="[fullscreenSurfaceClass(), combinedCardPaddingClass()]" @click="openDemoModal(stat.label)"><p class="text-xs sm:text-sm opacity-75" x-text="stat.label"></p><p class="mt-2 text-2xl sm:text-3xl font-bold" x-text="stat.value"></p><p class="mt-3 text-xs" :class="fullscreenTextActionClass()">Lihat detail</p></button></template></div>
                         <div class="grid lg:grid-cols-[1.5fr_1fr]" :class="combinedGridGapClass()">
-                            <section :class="[fullscreenSurfaceClass(), combinedCardPaddingClass()]"><div class="flex items-center justify-between"><h3 class="text-xl font-bold">Proyek Terbaru</h3><button type="button" class="font-semibold" :class="fullscreenTextActionClass()" @click="showDemoToast('Semua proyek ditampilkan')">Lihat semua</button></div><div class="mt-4 space-y-3"><template x-for="project in ['Riset Antarmuka Adaptif', 'Dashboard Analitik', 'Studi Aksesibilitas']" :key="project"><button type="button" class="w-full flex items-center justify-between gap-4 p-4 text-left" :class="fullscreenListItemClass()" @click="openDemoModal(project)"><span><strong x-text="project"></strong><small class="block mt-1 opacity-60">Diperbarui hari ini</small></span><span :class="fullscreenTextActionClass()">Buka</span></button></template></div></section>
+                            <section :class="[fullscreenSurfaceClass(), combinedCardPaddingClass()]"><div class="flex items-center justify-between"><h3 class="text-xl font-bold">Proyek Terbaru</h3><button type="button" class="font-semibold" :class="fullscreenTextActionClass()" @click="showDemoToast('Semua proyek ditampilkan')">Lihat semua</button></div><div class="mt-4 space-y-3"><template x-for="project in ['Riset Antarmuka Adaptif', 'Dashboard Analitik', 'Studi Aksesibilitas']" :key="project"><button type="button" class="w-full flex items-center justify-between gap-4 p-4 text-left" :class="fullscreenListItemClass()" @click="openDemoModal(project)"><span><strong x-text="project"></strong><small class="block mt-1 opacity-75">Diperbarui hari ini</small></span><span :class="fullscreenTextActionClass()">Buka</span></button></template></div></section>
                             <section :class="[fullscreenSurfaceClass(), combinedCardPaddingClass()]"><h3 class="text-xl font-bold">Aktivitas Tim</h3><div class="mt-5 space-y-5"><template x-for="activity in ['Nadia menyelesaikan evaluasi', 'Raka mengunggah dataset', 'Sinta menambahkan komentar']" :key="activity"><button type="button" class="flex gap-3 text-left items-center" @click="showDemoToast(activity)"><span class="w-9 h-9 shrink-0 flex items-center justify-center" :class="fullscreenIconBadgeClass()">•</span><span x-text="activity"></span></button></template></div></section>
                         </div>
 
-                        <section :class="[fullscreenSurfaceClass(), combinedCardPaddingClass(), combinedGridGapClass()]"><div class="flex items-end justify-between gap-4"><div><p class="text-sm opacity-55" x-text="demoArticle.category"></p><h3 class="mt-1 text-2xl font-bold" x-text="demoArticle.title"></h3></div></div>
-                            <div class="mt-5 w-full h-48 sm:h-64 rounded-xl" :class="demoArticle.cover"></div>
-                            <div class="mt-6 space-y-4 opacity-80 leading-relaxed text-sm sm:text-base text-justify">
+                        <section :class="[fullscreenSurfaceClass(), combinedCardPaddingClass(), combinedGridGapClass()]"><div class="flex items-end justify-between gap-4"><div><p class="text-sm opacity-75" x-text="demoArticle.category"></p><h3 class="mt-1 text-2xl font-bold" x-text="demoArticle.title"></h3></div></div>
+                            <div class="mt-5 w-full h-48 sm:h-64 rounded-xl tpuirf-palette-cover"></div>
+                            <div class="mt-6 space-y-4 opacity-90 leading-relaxed text-sm sm:text-base text-justify">
                                 <p x-text="demoArticle.content[0]"></p>
                                 <p x-text="demoArticle.content[1]"></p>
                                 <p x-text="demoArticle.content[2]"></p>
@@ -301,8 +291,8 @@
                 <div x-show="demoToast" x-transition class="fixed right-4 bottom-24 z-40 px-5 py-3 text-sm" :class="fullscreenToastClass()" x-text="demoToast"></div>
                 <div x-show="demoModal" x-cloak class="fixed inset-0 z-50 p-4 flex items-center justify-center" :class="fullscreenModalOverlayClass()" @click.self="demoModal = null">
                     <div class="w-full max-w-lg overflow-hidden" :class="fullscreenSurfaceClass()" role="dialog" aria-modal="true" aria-labelledby="demo-modal-title">
-                        <div class="p-5 sm:p-6 flex items-start gap-4 border-b border-current/10"><span class="w-11 h-11 shrink-0 flex items-center justify-center" :class="fullscreenIconBadgeClass()">✓</span><div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-[.15em] opacity-50">Pratinjau Interaksi</p><h3 id="demo-modal-title" class="mt-1 text-xl sm:text-2xl font-bold break-words" x-text="demoModal"></h3></div><button type="button" aria-label="Tutup modal" class="w-10 h-10 ml-auto shrink-0" :class="fullscreenIconButtonClass()" @click="demoModal = null">×</button></div>
-                        <div class="p-5 sm:p-6"><p class="leading-relaxed opacity-70">Komponen ini merespons seperti dashboard nyata. Aksi hanya disimulasikan dan tidak mengubah data eksperimen Anda.</p><div class="mt-5 p-4" :class="fullscreenListItemClass()"><p class="text-sm font-semibold">Yang akan terjadi</p><p class="mt-1 text-sm opacity-65">Sistem menampilkan konfirmasi visual dan mencatat interaksi pada pratinjau.</p></div></div>
+                        <div class="p-5 sm:p-6 flex items-start gap-4 border-b border-current/10"><span class="w-11 h-11 shrink-0 flex items-center justify-center" :class="fullscreenIconBadgeClass()">✓</span><div class="min-w-0"><p class="text-xs font-semibold uppercase tracking-[.15em] opacity-75">Pratinjau Interaksi</p><h3 id="demo-modal-title" class="mt-1 text-xl sm:text-2xl font-bold break-words" x-text="demoModal"></h3></div><button type="button" aria-label="Tutup modal" class="w-10 h-10 ml-auto shrink-0" :class="fullscreenIconButtonClass()" @click="demoModal = null">×</button></div>
+                        <div class="p-5 sm:p-6"><p class="leading-relaxed opacity-90">Komponen ini merespons seperti dashboard nyata. Aksi hanya disimulasikan dan tidak mengubah data eksperimen Anda.</p><div class="mt-5 p-4" :class="fullscreenListItemClass()"><p class="text-sm font-semibold">Yang akan terjadi</p><p class="mt-1 text-sm opacity-80">Sistem menampilkan konfirmasi visual dan mencatat interaksi pada pratinjau.</p></div></div>
                         <div class="p-5 sm:p-6 pt-0 flex flex-col-reverse sm:flex-row sm:justify-end gap-3"><button type="button" class="px-5 py-3 font-semibold" :class="fullscreenButtonClass(false)" @click="demoModal = null">Batal</button><button type="button" class="px-5 py-3 font-semibold" :class="fullscreenButtonClass(true)" @click="confirmDemoModal()">Konfirmasi Aksi</button></div>
                     </div>
                 </div>
@@ -329,16 +319,229 @@
 
 @push('styles')
 <style>
-    .tpuirf-palette-bg { background-color: var(--palette-background); }
-    .tpuirf-palette-deep { background-color: var(--palette-deep); }
-    .tpuirf-palette-soft { background-color: var(--palette-soft); }
-    .tpuirf-palette-primary { background-color: var(--palette-primary); }
-    .tpuirf-palette-accent { background-color: var(--palette-accent); }
+    .tpuirf-palette-bg { background-color: var(--palette-background); color: var(--palette-deep); }
+    .tpuirf-palette-deep { background-color: var(--palette-deep); color: #f8fafc; }
+    .tpuirf-palette-soft { background-color: var(--palette-soft); color: var(--palette-deep); }
+    .tpuirf-palette-primary { background-color: var(--palette-primary); color: #fff; }
+    .tpuirf-palette-accent { background-color: var(--palette-accent); color: #0f172a; }
     .tpuirf-palette-primary-text { color: var(--palette-primary); }
+    .tpuirf-palette-soft-text { color: var(--palette-soft); }
     .tpuirf-palette-deep-text { color: var(--palette-deep); }
-    .tpuirf-palette-primary:hover { background-color: var(--palette-accent); }
-    .tpuirf-palette-soft:hover { background-color: var(--palette-background); }
-    .tpuirf-palette-primary-text:hover { color: var(--palette-accent); }
+    .tpuirf-palette-cover { background: linear-gradient(135deg, var(--palette-soft), var(--palette-primary)); }
+    .tpuirf-palette-primary:hover { filter: brightness(.92); }
+    .tpuirf-palette-primary-text:hover { filter: brightness(.82); }
+
+    .tpuirf-glass-scene {
+        --glass-text: #0f172a;
+        --glass-muted: #334155;
+        --glass-action: #1d4ed8;
+        --glass-panel: rgba(255, 255, 255, .54);
+        --glass-panel-strong: rgba(255, 255, 255, .68);
+        --glass-control: rgba(255, 255, 255, .46);
+        --glass-rim: rgba(255, 255, 255, .82);
+        --glass-shadow: rgba(15, 23, 42, .16);
+        color: var(--glass-text);
+        background-color: #dfe8f2;
+        background-image:
+            radial-gradient(circle at 12% 8%, rgba(125, 211, 252, .28), transparent 32%),
+            radial-gradient(circle at 88% 24%, rgba(148, 163, 184, .3), transparent 30%),
+            linear-gradient(145deg, #edf3f8 0%, #dce7f1 54%, #e8edf3 100%);
+        background-image:
+            radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--palette-accent) 30%, transparent), transparent 32%),
+            radial-gradient(circle at 88% 24%, color-mix(in srgb, var(--palette-primary) 22%, transparent), transparent 30%),
+            linear-gradient(145deg, #edf3f8 0%, #dce7f1 54%, #e8edf3 100%);
+        background-attachment: fixed;
+    }
+
+    .tpuirf-glass-scene--dark {
+        --glass-text: #f8fafc;
+        --glass-muted: #cbd5e1;
+        --glass-action: #bae6fd;
+        --glass-panel: rgba(15, 23, 42, .48);
+        --glass-panel-strong: rgba(15, 23, 42, .62);
+        --glass-control: rgba(255, 255, 255, .1);
+        --glass-rim: rgba(255, 255, 255, .24);
+        --glass-shadow: rgba(2, 6, 23, .34);
+        background-color: #0b1220;
+        background-image:
+            radial-gradient(circle at 12% 8%, rgba(56, 189, 248, .2), transparent 32%),
+            radial-gradient(circle at 88% 24%, rgba(71, 85, 105, .34), transparent 30%),
+            linear-gradient(145deg, #0b1220 0%, #172033 54%, #111827 100%);
+        background-image:
+            radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--palette-accent) 22%, transparent), transparent 32%),
+            radial-gradient(circle at 88% 24%, color-mix(in srgb, var(--palette-primary) 18%, transparent), transparent 30%),
+            linear-gradient(145deg, #0b1220 0%, #172033 54%, #111827 100%);
+    }
+
+    .tpuirf-glass-panel,
+    .tpuirf-glass-nav,
+    .tpuirf-glass-pill,
+    .tpuirf-glass-input,
+    .tpuirf-glass-list-item,
+    .tpuirf-glass-orb,
+    .tpuirf-glass-toast {
+        color: var(--glass-text);
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, .12), transparent 42%),
+            var(--glass-panel);
+        border: 1px solid var(--glass-rim);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .38),
+            inset 1px 0 0 rgba(255, 255, 255, .12),
+            0 12px 30px var(--glass-shadow);
+        -webkit-backdrop-filter: blur(18px) saturate(112%);
+        backdrop-filter: blur(18px) saturate(112%);
+    }
+
+    .tpuirf-glass-panel { border-radius: 1.25rem; }
+    .tpuirf-glass-panel--nested {
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, .16), transparent 44%),
+            var(--glass-panel-strong);
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, .44),
+            0 6px 18px color-mix(in srgb, var(--glass-shadow) 72%, transparent);
+        -webkit-backdrop-filter: blur(14px) saturate(108%);
+        backdrop-filter: blur(14px) saturate(108%);
+    }
+    .tpuirf-glass-nav {
+        background:
+            linear-gradient(180deg, rgba(255, 255, 255, .16), transparent 58%),
+            var(--glass-panel-strong);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 8px 24px var(--glass-shadow);
+    }
+    .tpuirf-glass-pill {
+        border-radius: 9999px;
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, .18), transparent 48%),
+            var(--glass-control);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .46), 0 5px 16px var(--glass-shadow);
+        transition: background-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    }
+    .tpuirf-glass-pill:hover { transform: translateY(-1px); }
+    .tpuirf-glass-pill:active { transform: translateY(0); }
+    .tpuirf-glass-pill--primary,
+    .tpuirf-glass-pill--active {
+        color: #fff;
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, .18), transparent 42%),
+            linear-gradient(135deg, color-mix(in srgb, var(--palette-deep) 76%, var(--palette-primary)), color-mix(in srgb, var(--palette-deep) 64%, var(--palette-accent)));
+        border-color: rgba(255, 255, 255, .34);
+    }
+    .tpuirf-glass-input {
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--glass-panel-strong) 86%, transparent);
+        box-shadow: inset 0 2px 10px rgba(15, 23, 42, .12), inset 0 1px 0 rgba(255, 255, 255, .36);
+    }
+    .tpuirf-glass-list-item {
+        border-radius: 1rem;
+        background: color-mix(in srgb, var(--glass-control) 84%, transparent);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 4px 14px color-mix(in srgb, var(--glass-shadow) 68%, transparent);
+    }
+    .tpuirf-glass-orb {
+        border-radius: 9999px;
+        background:
+            radial-gradient(circle at 34% 28%, rgba(255, 255, 255, .38), transparent 28%),
+            color-mix(in srgb, var(--glass-control) 86%, transparent);
+        box-shadow:
+            inset 0 0 0 7px rgba(255, 255, 255, .07),
+            inset 0 1px 0 rgba(255, 255, 255, .48),
+            0 7px 18px var(--glass-shadow);
+    }
+    .tpuirf-glass-toast {
+        border-radius: 9999px;
+        background: var(--glass-panel-strong);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4), 0 10px 26px var(--glass-shadow);
+    }
+    .tpuirf-glass-overlay {
+        background: rgba(2, 6, 23, .38);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+    }
+    .tpuirf-glass-scene ::placeholder { color: color-mix(in srgb, var(--glass-muted) 86%, transparent); opacity: 1; }
+
+    .tpuirf-neu-scene {
+        --neu-surface: #e4eaf1;
+        --neu-text: #0f172a;
+        --neu-muted: #475569;
+        --neu-action: #3730a3;
+        --neu-dark-shadow: rgba(148, 163, 184, .48);
+        --neu-light-shadow: rgba(255, 255, 255, .9);
+        color: var(--neu-text);
+        background: linear-gradient(145deg, #edf1f6, #dfe5ed);
+    }
+    .tpuirf-neu-scene--dark {
+        --neu-surface: #1f2a39;
+        --neu-text: #f8fafc;
+        --neu-muted: #cbd5e1;
+        --neu-action: #c7d2fe;
+        --neu-dark-shadow: rgba(2, 6, 23, .66);
+        --neu-light-shadow: rgba(71, 85, 105, .48);
+        background: linear-gradient(145deg, #1c2634, #202b3a);
+    }
+    .tpuirf-neu-panel,
+    .tpuirf-neu-nav,
+    .tpuirf-neu-control,
+    .tpuirf-neu-input,
+    .tpuirf-neu-list-item,
+    .tpuirf-neu-orb,
+    .tpuirf-neu-toast {
+        color: var(--neu-text);
+        background: var(--neu-surface);
+        border: 0;
+    }
+    .tpuirf-neu-panel {
+        border-radius: 1rem;
+        box-shadow: 7px 7px 16px var(--neu-dark-shadow), -7px -7px 16px var(--neu-light-shadow);
+    }
+    .tpuirf-neu-inset,
+    .tpuirf-neu-input,
+    .tpuirf-neu-list-item,
+    .tpuirf-neu-control--inset {
+        color: var(--neu-text);
+        background: var(--neu-surface);
+        border-radius: .875rem;
+        box-shadow: inset 3px 3px 7px var(--neu-dark-shadow), inset -3px -3px 7px var(--neu-light-shadow);
+    }
+    .tpuirf-neu-nav {
+        box-shadow: 5px 5px 12px var(--neu-dark-shadow), -5px -5px 12px var(--neu-light-shadow);
+    }
+    .tpuirf-neu-control {
+        border-radius: .75rem;
+        box-shadow: 4px 4px 9px var(--neu-dark-shadow), -4px -4px 9px var(--neu-light-shadow);
+        transition: box-shadow 160ms ease, color 160ms ease;
+    }
+    .tpuirf-neu-control:hover { box-shadow: 2px 2px 6px var(--neu-dark-shadow), -2px -2px 6px var(--neu-light-shadow); }
+    .tpuirf-neu-control:active { box-shadow: inset 3px 3px 7px var(--neu-dark-shadow), inset -3px -3px 7px var(--neu-light-shadow); }
+    .tpuirf-neu-control--inset { color: var(--neu-action); }
+    .tpuirf-neu-input { border-radius: .875rem; }
+    .tpuirf-neu-list-item { border-radius: .75rem; }
+    .tpuirf-neu-orb {
+        border-radius: 9999px;
+        color: var(--neu-action);
+        box-shadow: 4px 4px 9px var(--neu-dark-shadow), -4px -4px 9px var(--neu-light-shadow), inset 0 0 0 6px color-mix(in srgb, var(--neu-light-shadow) 18%, transparent);
+    }
+    .tpuirf-neu-toast {
+        border-radius: .875rem;
+        box-shadow: 6px 6px 14px var(--neu-dark-shadow), -6px -6px 14px var(--neu-light-shadow);
+    }
+    .tpuirf-neu-scene ::placeholder { color: var(--neu-muted); opacity: 1; }
+    .tpuirf-style-action { color: var(--glass-action, var(--neu-action)); font-weight: 600; }
+    .tpuirf-glass-scene :is(button, input):focus-visible,
+    .tpuirf-neu-scene :is(button, input):focus-visible {
+        outline: 2px solid var(--glass-action, var(--neu-action));
+        outline-offset: 3px;
+    }
+
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        .tpuirf-glass-panel,
+        .tpuirf-glass-nav,
+        .tpuirf-glass-pill,
+        .tpuirf-glass-input,
+        .tpuirf-glass-list-item,
+        .tpuirf-glass-orb,
+        .tpuirf-glass-toast { background-color: var(--glass-panel-strong); }
+    }
 </style>
 @endpush
 
@@ -362,7 +565,7 @@ function researchPreferenceTask(config) {
         demoArticle: {
             category: 'Riset Antarmuka',
             title: 'Membaca pola interaksi tanpa kehilangan konteks pengguna',
-            cover: 'bg-gradient-to-br from-indigo-300 via-purple-300 to-rose-300',
+            cover: null,
             content: [
                 'Pelajari cara menggabungkan data klik, waktu aktif, dan transisi untuk menemukan pola yang benar-benar bermakna. Analisis kuantitatif tanpa konteks kualitatif sering kali menyesatkan karena satu klik cepat bisa berarti efisiensi, atau sebaliknya, kebingungan antarmuka.',
                 'Dalam eksperimen skala besar, randomisasi opsi adalah kunci untuk mencegah bias posisi. Sering kali, opsi pertama menerima lebih banyak interaksi hanya karena letaknya yang mudah dijangkau, bukan karena opsi tersebut merupakan pilihan yang secara sadar disukai partisipan.',
@@ -837,11 +1040,11 @@ function researchPreferenceTask(config) {
         paletteVariables() {
             const palettes = {
                 blue: { primary: '#2563eb', accent: '#06b6d4', soft: '#dbeafe', background: '#eff6ff', deep: '#172554' },
-                green: { primary: '#059669', accent: '#14b8a6', soft: '#d1fae5', background: '#ecfdf5', deep: '#064e3b' },
+                green: { primary: '#047857', accent: '#14b8a6', soft: '#d1fae5', background: '#ecfdf5', deep: '#064e3b' },
                 purple: { primary: '#7c3aed', accent: '#d946ef', soft: '#ede9fe', background: '#faf5ff', deep: '#581c87' },
-                orange: { primary: '#ea580c', accent: '#f59e0b', soft: '#ffedd5', background: '#fff7ed', deep: '#7c2d12' },
+                orange: { primary: '#c2410c', accent: '#f59e0b', soft: '#ffedd5', background: '#fff7ed', deep: '#7c2d12' },
                 rose: { primary: '#e11d48', accent: '#ec4899', soft: '#ffe4e6', background: '#fff1f2', deep: '#881337' },
-                neutral: { primary: '#475569', accent: '#64748b', soft: '#e2e8f0', background: '#f8fafc', deep: '#1e293b' },
+                neutral: { primary: '#475569', accent: '#94a3b8', soft: '#e2e8f0', background: '#f8fafc', deep: '#1e293b' },
             };
             const palette = palettes[this.selectedPalette || this.combinedPreferences.color_palette] || palettes.blue;
             return {
@@ -853,42 +1056,51 @@ function researchPreferenceTask(config) {
             };
         },
         previewBackgroundClass(style = null) {
-            if (style === 'high_contrast_brutalist') return this.combinedPreferences.theme === 'dark' ? 'bg-slate-900' : 'bg-stone-200';
-            return 'tpuirf-palette-bg';
+            const dark = this.combinedPreferences.theme === 'dark';
+            if (style === 'glassmorphism') return `tpuirf-glass-scene ${dark ? 'tpuirf-glass-scene--dark' : ''}`;
+            if (style === 'neumorphism') return `tpuirf-neu-scene ${dark ? 'tpuirf-neu-scene--dark' : ''}`;
+            if (style === 'high_contrast_brutalist') return dark ? 'bg-slate-900' : 'bg-stone-200';
+            return dark ? 'bg-slate-950' : 'bg-slate-100';
         },
         compactSurfaceClass(style, nested = false) {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
-                glassmorphism: dark ? 'rounded-2xl bg-gradient-to-b from-white/10 to-white/5 text-white backdrop-blur-3xl backdrop-saturate-150 border border-white/10 border-t-white/30 border-l-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'rounded-2xl bg-gradient-to-b from-white/60 to-white/30 text-slate-900 backdrop-blur-3xl backdrop-saturate-150 border border-white/80 border-t-white border-l-white shadow-[0_8px_32px_rgba(31,38,135,0.1)]',
-                neumorphism: dark ? `rounded-2xl bg-slate-800 text-slate-100 border-0 ${nested ? 'shadow-[inset_5px_5px_10px_#0f172a,inset_-5px_-5px_10px_#334155]' : 'shadow-[10px_10px_22px_#0f172a,-10px_-10px_22px_#334155]'}` : `rounded-2xl bg-slate-200 text-slate-900 border-0 ${nested ? 'shadow-[inset_5px_5px_10px_#b8c0cc,inset_-5px_-5px_10px_#ffffff]' : 'shadow-[10px_10px_24px_#b8c0cc,-10px_-10px_24px_#ffffff]'}`,
-                material_elevated: dark ? 'rounded-2xl tpuirf-palette-deep text-slate-100 shadow-xl' : 'rounded-2xl tpuirf-palette-bg text-slate-900 shadow-xl',
+                glassmorphism: `tpuirf-glass-panel${nested ? ' tpuirf-glass-panel--nested' : ''}`,
+                neumorphism: nested ? 'tpuirf-neu-inset' : 'tpuirf-neu-panel',
+                material_elevated: dark
+                    ? (nested ? 'rounded-2xl bg-white/10 text-slate-100 shadow-md' : 'rounded-2xl tpuirf-palette-deep shadow-lg')
+                    : (nested ? 'rounded-2xl bg-white text-slate-900 shadow-md' : 'rounded-2xl tpuirf-palette-bg shadow-lg'),
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[7px_7px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[7px_7px_0_#94a3b8]',
-                minimal_flat: dark ? 'rounded-lg tpuirf-palette-deep text-slate-100 border-2 border-slate-700' : 'rounded-lg tpuirf-palette-bg text-slate-900 border-2 border-slate-300',
+                minimal_flat: dark
+                    ? (nested ? 'rounded-lg bg-white/10 text-slate-100 border border-white/20' : 'rounded-lg tpuirf-palette-deep border-2 border-white/20')
+                    : (nested ? 'rounded-lg bg-white text-slate-900 border border-slate-300' : 'rounded-lg tpuirf-palette-bg border-2 border-slate-300'),
             }[style] || 'rounded-2xl bg-white text-slate-900';
         },
         compactNavigationClass(style) {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
-                glassmorphism: dark ? 'bg-white/5 text-white backdrop-blur-3xl backdrop-saturate-150 border-b border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.3)]' : 'bg-white/40 text-slate-900 backdrop-blur-3xl backdrop-saturate-150 border-b border-white/80 shadow-[0_4px_16px_rgba(31,38,135,0.05)]',
-                neumorphism: dark ? 'bg-slate-800 text-slate-100 shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155]' : 'bg-slate-200 text-slate-900 shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff]',
-                material_elevated: dark ? 'bg-slate-800 text-white shadow-lg' : 'bg-white text-slate-900 shadow-lg',
+                glassmorphism: 'tpuirf-glass-nav',
+                neumorphism: 'tpuirf-neu-nav',
+                material_elevated: dark ? 'bg-slate-800 text-slate-100 shadow-md' : 'bg-white text-slate-900 shadow-md',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-b-4 border-black' : 'bg-stone-100 text-slate-900 border-b-4 border-slate-900',
-                minimal_flat: dark ? 'bg-slate-900 text-white border-b-2 border-slate-700' : 'bg-white text-slate-900 border-b-2 border-slate-300',
-            }[style] || 'tpuirf-palette-primary text-white';
+                minimal_flat: dark ? 'bg-slate-900 text-slate-100 border-b-2 border-white/20' : 'bg-white text-slate-900 border-b-2 border-slate-300',
+            }[style] || 'tpuirf-palette-primary';
         },
         compactButtonClass(style, primary) {
             const dark = this.combinedPreferences.theme === 'dark';
-            if (style === 'glassmorphism') return primary ? 'rounded-xl tpuirf-palette-primary text-white backdrop-blur-md border border-white/30 shadow-lg transition-all' : 'rounded-xl bg-white/20 text-current backdrop-blur-md border border-white/50 border-t-white/80 hover:bg-white/40 hover:shadow-lg transition-all';
-            if (style === 'neumorphism') return dark ? `rounded-xl bg-slate-800 text-indigo-400 transition-all duration-300 ${primary ? 'shadow-[6px_6px_12px_#0f172a,-6px_-6px_12px_#334155] hover:shadow-[2px_2px_4px_#0f172a,-2px_-2px_4px_#334155] hover:scale-[0.98]' : 'shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155] hover:shadow-[inset_2px_2px_4px_#0f172a,inset_-2px_-2px_4px_#334155]'}` : `rounded-xl bg-slate-200 text-indigo-700 transition-all duration-300 ${primary ? 'shadow-[6px_6px_12px_#b8c0cc,-6px_-6px_12px_#ffffff] hover:shadow-[2px_2px_4px_#b8c0cc,-2px_-2px_4px_#ffffff] hover:scale-[0.98]' : 'shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#b8c0cc,inset_-2px_-2px_4px_#ffffff]'}`;
-            if (style === 'high_contrast_brutalist') return primary ? 'tpuirf-palette-accent text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0_#94a3b8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#94a3b8] hover:bg-stone-200 transition-all');
-            if (style === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary text-white hover:-translate-y-0.5 transition-transform' : 'rounded-lg border-2 border-current tpuirf-palette-soft transition-colors';
-            return primary ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all' : 'rounded-xl border border-current/20 shadow-sm tpuirf-palette-soft transition-colors';
+            if (style === 'glassmorphism') return primary ? 'tpuirf-glass-pill tpuirf-glass-pill--primary' : 'tpuirf-glass-pill';
+            if (style === 'neumorphism') return primary ? 'tpuirf-neu-control' : 'tpuirf-neu-control tpuirf-neu-control--inset';
+            if (style === 'high_contrast_brutalist') return primary ? 'tpuirf-palette-accent border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[4px_4px_0_#000] hover:bg-slate-600 transition-colors' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[4px_4px_0_#94a3b8] hover:bg-stone-200 transition-colors');
+            if (style === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary transition-[filter]' : (dark ? 'rounded-lg border-2 border-white/30 bg-white/10 text-slate-100 transition-colors' : 'rounded-lg border-2 border-slate-400 bg-white text-slate-900 transition-colors');
+            return primary ? 'rounded-xl tpuirf-palette-primary shadow-md hover:shadow-lg transition-[filter,box-shadow]' : (dark ? 'rounded-xl border border-white/20 bg-white/10 text-slate-100 shadow-sm' : 'rounded-xl border border-slate-300 bg-white text-slate-900 shadow-sm');
         },
         compactSelectionButtonClass(style) {
-            if (style === 'high_contrast_brutalist') return this.isStyleSelected(style) ? 'bg-rose-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-rose-500 transition-all' : 'bg-emerald-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-emerald-500 transition-all';
-            if (style === 'glassmorphism') return this.isStyleSelected(style) ? 'rounded-xl tpuirf-palette-primary text-white backdrop-blur-md border border-white/50 border-t-white/80 shadow-lg transition-all' : 'rounded-xl tpuirf-palette-soft tpuirf-palette-deep-text border border-white/50 shadow-lg transition-all';
-            if (style === 'neumorphism') return this.compactButtonClass(style, !this.isStyleSelected(style));
-            return this.isStyleSelected(style) ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg hover:-translate-y-0.5 transition-all' : 'rounded-xl tpuirf-palette-soft tpuirf-palette-deep-text shadow-lg transition-all';
+            const selected = this.isStyleSelected(style);
+            const dark = this.combinedPreferences.theme === 'dark';
+            if (style === 'high_contrast_brutalist') return selected ? 'bg-black text-white border-4 border-black shadow-[4px_4px_0_var(--palette-accent)] hover:translate-x-[2px] hover:translate-y-[2px] transition-transform' : 'tpuirf-palette-accent border-4 border-black shadow-[4px_4px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] transition-transform';
+            if (style === 'glassmorphism') return selected ? 'tpuirf-glass-pill tpuirf-glass-pill--active' : 'tpuirf-glass-pill';
+            if (style === 'neumorphism') return selected ? 'tpuirf-neu-control tpuirf-neu-control--inset' : 'tpuirf-neu-control';
+            return selected ? 'rounded-xl tpuirf-palette-primary shadow-md' : (dark ? 'rounded-xl bg-white/10 text-slate-100 border border-white/20' : 'rounded-xl tpuirf-palette-soft border border-current/10');
         },
         eventUuid() {
             if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -907,80 +1119,84 @@ function researchPreferenceTask(config) {
         fullscreenBackgroundClass() {
             const dark = this.combinedPreferences.theme === 'dark';
             if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-900 text-slate-100' : 'bg-stone-200 text-slate-900';
-            if (this.fullscreenStyle === 'neumorphism') return dark ? 'bg-slate-800 text-slate-100' : 'bg-[#e3e8ef] text-slate-800';
-            if (this.fullscreenStyle === 'glassmorphism') return dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-800';
-            return dark ? 'bg-slate-950 text-slate-100' : 'bg-white text-slate-900';
+            if (this.fullscreenStyle === 'neumorphism') return `tpuirf-neu-scene ${dark ? 'tpuirf-neu-scene--dark' : ''}`;
+            if (this.fullscreenStyle === 'glassmorphism') return `tpuirf-glass-scene ${dark ? 'tpuirf-glass-scene--dark' : ''}`;
+            return dark ? 'bg-slate-950 text-slate-100' : 'bg-slate-100 text-slate-900';
         },
         fullscreenSurfaceClass() {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
-                glassmorphism: dark ? 'rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.5)]' : 'rounded-2xl bg-gradient-to-br from-white/60 to-white/20 backdrop-blur-2xl border border-white shadow-[0_8px_32px_rgba(31,38,135,0.15)]',
-                neumorphism: dark ? 'rounded-2xl bg-slate-800 shadow-[8px_8px_20px_#0f172a,-8px_-8px_20px_#334155]' : 'rounded-2xl bg-slate-200 shadow-[12px_12px_28px_#b8c0cc,-12px_-12px_28px_#ffffff]',
-                material_elevated: dark ? 'rounded-2xl tpuirf-palette-deep shadow-2xl' : 'rounded-2xl tpuirf-palette-bg shadow-2xl',
+                glassmorphism: 'tpuirf-glass-panel',
+                neumorphism: 'tpuirf-neu-panel',
+                material_elevated: dark ? 'rounded-2xl bg-slate-800 text-slate-100 shadow-lg' : 'rounded-2xl bg-white text-slate-900 shadow-lg',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[9px_9px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[9px_9px_0_#94a3b8]',
-                minimal_flat: dark ? 'rounded-xl tpuirf-palette-deep border-2 border-slate-700' : 'rounded-xl tpuirf-palette-bg border-2 border-slate-300',
-            }[this.fullscreenStyle] || (dark ? 'rounded-2xl bg-slate-800' : 'rounded-2xl bg-white');
+                minimal_flat: dark ? 'rounded-xl bg-slate-900 text-slate-100 border-2 border-white/20' : 'rounded-xl bg-white text-slate-900 border-2 border-slate-300',
+            }[this.fullscreenStyle] || (dark ? 'rounded-2xl bg-slate-800 text-slate-100' : 'rounded-2xl bg-white text-slate-900');
         },
         fullscreenNavigationClass() {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
-                glassmorphism: dark ? 'bg-white/10 text-white backdrop-blur-2xl border border-white/20 shadow-2xl' : 'bg-white/35 text-slate-900 backdrop-blur-2xl border border-white/80 shadow-2xl',
-                neumorphism: dark ? 'bg-slate-800 text-slate-100 shadow-[8px_8px_20px_#0f172a,-8px_-8px_20px_#334155]' : 'bg-slate-200 text-slate-900 shadow-[8px_8px_20px_#b8c0cc,-8px_-8px_20px_#ffffff]',
-                material_elevated: dark ? 'tpuirf-palette-deep text-white shadow-xl' : 'tpuirf-palette-bg text-slate-900 shadow-xl',
+                glassmorphism: 'tpuirf-glass-nav',
+                neumorphism: 'tpuirf-neu-nav',
+                material_elevated: dark ? 'bg-slate-800 text-slate-100 shadow-lg' : 'bg-white text-slate-900 shadow-lg',
                 high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[7px_7px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[7px_7px_0_#94a3b8]',
-                minimal_flat: dark ? 'tpuirf-palette-deep text-white border-2 border-slate-700' : 'tpuirf-palette-bg text-slate-900 border-2 border-slate-300',
-            }[this.fullscreenStyle] || 'tpuirf-palette-primary text-white';
+                minimal_flat: dark ? 'bg-slate-900 text-slate-100 border-2 border-white/20' : 'bg-white text-slate-900 border-2 border-slate-300',
+            }[this.fullscreenStyle] || 'tpuirf-palette-primary';
         },
         fullscreenNavItemClass(item) {
             const active = this.demoActiveNav === item;
             const dark = this.combinedPreferences.theme === 'dark';
-            if (this.fullscreenStyle === 'glassmorphism') return active ? 'rounded-xl bg-white/30 backdrop-blur-xl border border-white/50 shadow-lg' : 'rounded-xl border border-transparent hover:bg-white/10';
-            if (this.fullscreenStyle === 'neumorphism') return dark ? `rounded-xl bg-slate-800 transition-shadow duration-300 ${active ? 'text-indigo-400 shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155]' : 'shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155] hover:shadow-[inset_3px_3px_6px_#0f172a,inset_-3px_-3px_6px_#334155]'}` : `rounded-xl bg-slate-200 transition-shadow duration-300 ${active ? 'text-indigo-700 shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff]' : 'shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff] hover:shadow-[inset_3px_3px_6px_#b8c0cc,inset_-3px_-3px_6px_#ffffff]'}`;
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return active ? 'bg-indigo-400 text-slate-900 border-4 border-black shadow-[4px_4px_0_#000]' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 hover:bg-emerald-100');
-            if (this.fullscreenStyle === 'minimal_flat') return active ? 'rounded-lg tpuirf-palette-primary text-white' : 'rounded-lg tpuirf-palette-soft';
-            return active ? 'rounded-xl tpuirf-palette-primary text-white shadow-md' : 'rounded-xl tpuirf-palette-soft';
+            if (this.fullscreenStyle === 'glassmorphism') return active ? 'tpuirf-glass-pill tpuirf-glass-pill--active' : 'tpuirf-glass-pill';
+            if (this.fullscreenStyle === 'neumorphism') return active ? 'tpuirf-neu-control tpuirf-neu-control--inset' : 'tpuirf-neu-control';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return active ? 'tpuirf-palette-accent border-4 border-black shadow-[4px_4px_0_#000]' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black hover:bg-slate-600 transition-colors' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 hover:bg-stone-200 transition-colors');
+            if (active) return this.fullscreenStyle === 'minimal_flat' ? 'rounded-lg tpuirf-palette-primary' : 'rounded-xl tpuirf-palette-primary shadow-sm';
+            return dark ? (this.fullscreenStyle === 'minimal_flat' ? 'rounded-lg bg-white/10 text-slate-100' : 'rounded-xl bg-white/10 text-slate-100') : (this.fullscreenStyle === 'minimal_flat' ? 'rounded-lg bg-slate-100 text-slate-900' : 'rounded-xl bg-slate-100 text-slate-900');
         },
         fullscreenInputClass() {
             const dark = this.combinedPreferences.theme === 'dark';
             return {
-                glassmorphism: dark ? 'rounded-xl bg-white/10 text-white placeholder-white/60 backdrop-blur-xl border border-white/30 shadow-lg' : 'rounded-xl bg-white/35 text-slate-900 placeholder-slate-600 backdrop-blur-xl border border-white/80 shadow-lg',
-                neumorphism: dark ? 'rounded-xl bg-slate-800 text-white border-0 shadow-[inset_5px_5px_10px_#0f172a,inset_-5px_-5px_10px_#334155]' : 'rounded-xl bg-slate-200 text-slate-900 border-0 shadow-[inset_5px_5px_10px_#b8c0cc,inset_-5px_-5px_10px_#ffffff]',
-                material_elevated: dark ? 'rounded-xl bg-slate-800 text-white border border-slate-700 shadow-lg' : 'rounded-xl bg-white text-slate-900 border-0 shadow-lg',
-                high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[5px_5px_0_#000] placeholder-slate-400' : 'bg-stone-50 text-slate-900 border-4 border-slate-900 shadow-[5px_5px_0_#94a3b8] placeholder-slate-500',
-                minimal_flat: dark ? 'rounded-lg bg-slate-900 text-white border-2 border-slate-700' : 'rounded-lg bg-white text-slate-900 border-2 border-slate-300',
-            }[this.fullscreenStyle] || 'rounded-xl bg-white text-slate-900';
+                glassmorphism: 'tpuirf-glass-input',
+                neumorphism: 'tpuirf-neu-input',
+                material_elevated: dark ? 'rounded-xl bg-slate-900 text-slate-100 placeholder-slate-300 border border-slate-700 shadow-sm' : 'rounded-xl bg-white text-slate-900 placeholder-slate-500 border border-slate-300 shadow-sm',
+                high_contrast_brutalist: dark ? 'bg-slate-800 text-slate-100 placeholder-slate-300 border-4 border-black shadow-[5px_5px_0_#000]' : 'bg-stone-50 text-slate-900 placeholder-slate-500 border-4 border-slate-900 shadow-[5px_5px_0_#94a3b8]',
+                minimal_flat: dark ? 'rounded-lg bg-slate-900 text-slate-100 placeholder-slate-300 border-2 border-white/30' : 'rounded-lg bg-white text-slate-900 placeholder-slate-500 border-2 border-slate-400',
+            }[this.fullscreenStyle] || 'rounded-xl bg-white text-slate-900 placeholder-slate-500';
         },
         fullscreenButtonClass(primary = true) {
             const dark = this.combinedPreferences.theme === 'dark';
-            if (this.fullscreenStyle === 'glassmorphism') return primary ? 'rounded-xl bg-white/30 backdrop-blur-xl border border-white/60 shadow-lg hover:bg-white/40' : 'rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 hover:bg-white/20';
-            if (this.fullscreenStyle === 'neumorphism') return dark ? `rounded-xl bg-slate-800 text-indigo-400 ${primary ? 'shadow-[6px_6px_12px_#0f172a,-6px_-6px_12px_#334155] hover:shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155]' : 'shadow-[inset_4px_4px_8px_#0f172a,inset_-4px_-4px_8px_#334155] hover:shadow-[inset_2px_2px_4px_#0f172a,inset_-2px_-2px_4px_#334155]'}` : `rounded-xl bg-slate-200 text-indigo-700 ${primary ? 'shadow-[6px_6px_12px_#b8c0cc,-6px_-6px_12px_#ffffff] hover:shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff]' : 'shadow-[inset_4px_4px_8px_#b8c0cc,inset_-4px_-4px_8px_#ffffff] hover:shadow-[inset_2px_2px_4px_#b8c0cc,inset_-2px_-2px_4px_#ffffff]'}`;
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return primary ? 'bg-indigo-400 text-slate-900 border-4 border-black shadow-[5px_5px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#000] hover:bg-indigo-500 transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[5px_5px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#000] hover:bg-slate-600 transition-all' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[5px_5px_0_#94a3b8] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#94a3b8] hover:bg-stone-200 transition-all');
-            if (this.fullscreenStyle === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary text-white' : 'rounded-lg border-2 border-current tpuirf-palette-soft';
-            return primary ? 'rounded-xl tpuirf-palette-primary text-white shadow-lg' : 'rounded-xl border border-current/20 tpuirf-palette-soft';
+            if (this.fullscreenStyle === 'glassmorphism') return primary ? 'tpuirf-glass-pill tpuirf-glass-pill--primary' : 'tpuirf-glass-pill';
+            if (this.fullscreenStyle === 'neumorphism') return primary ? 'tpuirf-neu-control' : 'tpuirf-neu-control tpuirf-neu-control--inset';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return primary ? 'tpuirf-palette-accent border-4 border-black shadow-[5px_5px_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[3px_3px_0_#000] transition-all' : (dark ? 'bg-slate-700 text-slate-100 border-4 border-black shadow-[5px_5px_0_#000] hover:bg-slate-600 transition-colors' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[5px_5px_0_#94a3b8] hover:bg-stone-200 transition-colors');
+            if (this.fullscreenStyle === 'minimal_flat') return primary ? 'rounded-lg tpuirf-palette-primary' : (dark ? 'rounded-lg border-2 border-white/30 bg-white/10 text-slate-100' : 'rounded-lg border-2 border-slate-400 bg-white text-slate-900');
+            return primary ? 'rounded-xl tpuirf-palette-primary shadow-md' : (dark ? 'rounded-xl border border-white/20 bg-white/10 text-slate-100 shadow-sm' : 'rounded-xl border border-slate-300 bg-white text-slate-900 shadow-sm');
         },
         fullscreenIconButtonClass() { return this.fullscreenButtonClass(false); },
-        fullscreenTextActionClass() { return this.fullscreenStyle === 'high_contrast_brutalist' ? 'font-black underline decoration-4 hover:opacity-70' : 'tpuirf-palette-primary-text'; },
+        fullscreenTextActionClass() {
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return 'font-black underline decoration-4 hover:opacity-80';
+            if (['glassmorphism', 'neumorphism'].includes(this.fullscreenStyle)) return 'tpuirf-style-action';
+            return this.combinedPreferences.theme === 'dark' ? 'tpuirf-palette-soft-text font-semibold' : 'tpuirf-palette-primary-text font-semibold';
+        },
         fullscreenListItemClass() {
-            if (this.fullscreenStyle === 'glassmorphism') return 'rounded-xl bg-white/10 backdrop-blur-xl border border-white/30 hover:bg-white/20';
-            if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-xl bg-slate-800 shadow-[inset_3px_3px_7px_#0f172a,inset_-3px_-3px_7px_#334155]' : 'rounded-xl bg-slate-200 shadow-[inset_3px_3px_7px_#b8c0cc,inset_-3px_-3px_7px_#ffffff]';
             const dark = this.combinedPreferences.theme === 'dark';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black hover:bg-slate-700 transition-colors' : 'tpuirf-palette-soft text-slate-900 border-4 border-slate-900';
-            return 'rounded-xl border border-current/10 tpuirf-palette-soft';
+            if (this.fullscreenStyle === 'glassmorphism') return 'tpuirf-glass-list-item';
+            if (this.fullscreenStyle === 'neumorphism') return 'tpuirf-neu-list-item';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black hover:bg-slate-700 transition-colors' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 hover:bg-stone-200 transition-colors';
+            return dark ? 'rounded-xl border border-white/20 bg-white/10 text-slate-100' : 'rounded-xl border border-slate-300 bg-slate-50 text-slate-900';
         },
         fullscreenIconBadgeClass() {
-            if (this.fullscreenStyle === 'glassmorphism') return 'rounded-full bg-white/20 backdrop-blur-xl border border-white/40';
-            if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-full bg-slate-800 shadow-[4px_4px_8px_#0f172a,-4px_-4px_8px_#334155]' : 'rounded-full bg-slate-200 shadow-[4px_4px_8px_#b8c0cc,-4px_-4px_8px_#ffffff]';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return 'tpuirf-palette-accent text-slate-900 border-4 border-black shadow-[2px_2px_0_#000]';
-            return 'rounded-full tpuirf-palette-primary text-white';
+            if (this.fullscreenStyle === 'glassmorphism') return 'tpuirf-glass-orb';
+            if (this.fullscreenStyle === 'neumorphism') return 'tpuirf-neu-orb';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return 'tpuirf-palette-accent border-4 border-black shadow-[2px_2px_0_#000]';
+            return 'rounded-full tpuirf-palette-primary';
         },
         fullscreenToastClass() {
-            if (this.fullscreenStyle === 'glassmorphism') return 'rounded-xl bg-white/20 backdrop-blur-2xl border border-white/50 shadow-2xl';
-            if (this.fullscreenStyle === 'neumorphism') return this.combinedPreferences.theme === 'dark' ? 'rounded-xl bg-slate-800 text-white shadow-[7px_7px_15px_#0f172a,-7px_-7px_15px_#334155]' : 'rounded-xl bg-slate-200 text-slate-900 shadow-[7px_7px_15px_#b8c0cc,-7px_-7px_15px_#ffffff]';
             const dark = this.combinedPreferences.theme === 'dark';
-            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[6px_6px_0_#000]' : 'tpuirf-palette-soft text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0_#64748b]';
-            return 'rounded-xl tpuirf-palette-deep text-white shadow-2xl';
+            if (this.fullscreenStyle === 'glassmorphism') return 'tpuirf-glass-toast';
+            if (this.fullscreenStyle === 'neumorphism') return 'tpuirf-neu-toast';
+            if (this.fullscreenStyle === 'high_contrast_brutalist') return dark ? 'bg-slate-800 text-slate-100 border-4 border-black shadow-[6px_6px_0_#000]' : 'bg-stone-100 text-slate-900 border-4 border-slate-900 shadow-[6px_6px_0_#64748b]';
+            return 'rounded-xl tpuirf-palette-deep shadow-xl';
         },
-        fullscreenModalOverlayClass() { return this.fullscreenStyle === 'glassmorphism' ? 'bg-slate-950/40' : this.fullscreenStyle === 'high_contrast_brutalist' ? 'bg-slate-800/55' : 'bg-slate-950/60'; },
+        fullscreenModalOverlayClass() { return this.fullscreenStyle === 'glassmorphism' ? 'tpuirf-glass-overlay' : this.fullscreenStyle === 'high_contrast_brutalist' ? 'bg-slate-800/55' : 'bg-slate-950/60'; },
     };
 }
 </script>
