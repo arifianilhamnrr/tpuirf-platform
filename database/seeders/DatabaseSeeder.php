@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             UiTemplateSeeder::class,
             ExperimentSeeder::class,
+            DummyResearchDataSeeder::class,
         ]);
     }
 }
