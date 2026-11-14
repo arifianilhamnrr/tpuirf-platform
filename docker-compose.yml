@@ -14,6 +14,7 @@ services:
       - APP_KEY=base64:SI7i7Zjc/c5/ZqhXZ2vyVTYZjdYqsf2YkYE3sohboKM=
       - APP_URL=https://tpuirf.projectar.web.id
       - DB_CONNECTION=sqlite
+      - DB_DATABASE=/var/www/html/database/data/database.sqlite
       - SESSION_DRIVER=database
       - QUEUE_CONNECTION=database
       - CACHE_STORE=database
@@ -21,7 +22,7 @@ services:
       - GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxLB-B-iW1Wlri4imCrGQrEEO99XAAsX2ye2d061uSWAvtiCPDZQ1-LgI6QT0xsZiks/exec
     volumes:
       - tpuirf_storage:/var/www/html/storage
-      - tpuirf_db:/var/www/html/database
+      - tpuirf_db:/var/www/html/database/data
     depends_on:
       - ml
 

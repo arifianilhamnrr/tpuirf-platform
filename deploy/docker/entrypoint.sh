@@ -5,9 +5,15 @@ if [ ! -f /var/www/html/.env ]; then
     cp /var/www/html/.env.example /var/www/html/.env
 fi
 
-if [ ! -f /var/www/html/database/database.sqlite ]; then
-    touch /var/www/html/database/database.sqlite
-    chown www-data:www-data /var/www/html/database/database.sqlite
+mkdir -p /var/www/html/database/data
+
+if [ ! -f /var/www/html/database/data/database.sqlite ]; then
+    if [ -f /var/www/html/database/database.sqlite ]; then
+        cp /var/www/html/database/database.sqlite /var/www/html/database/data/database.sqlite
+    else
+        touch /var/www/html/database/data/database.sqlite
+    fi
+    chown www-data:www-data /var/www/html/database/data/database.sqlite
 fi
 
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
