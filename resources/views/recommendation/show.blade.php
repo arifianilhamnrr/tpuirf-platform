@@ -23,8 +23,8 @@
     @endphp
     <div class="max-w-4xl mx-auto space-y-6">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Rekomendasi Antarmuka Anda</h1>
-            <p class="text-gray-500 dark:text-gray-400 mt-2">Konfigurasi dihitung dari profil, kebiasaan penggunaan, dan perilaku interaksi selama eksperimen.</p>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Rekomendasi Antarmuka Untuk Anda</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Tampilan ini dirancang khusus menyesuaikan profil, kebiasaan, dan cara Anda berinteraksi selama sesi uji coba.</p>
         </div>
 
         <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
@@ -35,10 +35,10 @@
                     </div>
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
-                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Konfigurasi Rekomendasi Model</h2>
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Konfigurasi Pilihan Sistem (AI)</h2>
                             <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $usingFallback ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' }}">{{ $usingFallback ? 'Ringkasan sementara' : 'Prediksi AI' }}</span>
                         </div>
-                        <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $usingFallback ? 'Model belum memiliki data training yang cukup; sementara ini sistem memakai pilihan akhir Anda.' : 'Random Forest dan XGBoost menyepakati rekomendasi berikut dengan penjelasan SHAP.' }}</p>
+                        <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $usingFallback ? 'Sistem sementara memakai pilihan preferensi akhir Anda selagi data model terus dihimpun.' : 'Model pintar kami (kombinasi Random Forest dan XGBoost) menyepakati susunan antarmuka berikut dengan tingkat kecocokan ' . number_format($recommendation->confidenceScore * 100, 1) . '%:' }}</p>
                         <div class="mt-3 flex flex-wrap gap-2 text-sm">
                             @if(!empty($recommendedConfig['design_style']))
                                 <span class="rounded-full bg-indigo-500/10 px-3 py-1 font-medium text-indigo-700 dark:text-indigo-300">{{ $preferenceValue($recommendedConfig['design_style']) }}</span>
@@ -78,7 +78,7 @@
         @if($preferenceExperiment && !empty($finalPreferences))
             <div class="rounded-3xl border border-white/20 bg-white/60 p-6 shadow-lg backdrop-blur-xl dark:border-gray-700/30 dark:bg-gray-800/40">
                 <h2 class="font-bold text-gray-800 dark:text-white">Pilihan akhir Anda sebagai data penelitian</h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Data ini menjadi label pembelajaran model dan ditampilkan terpisah dari hasil rekomendasi.</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Pilihan akhir yang Anda tetapkan ini digunakan sebagai data pembelajaran untuk melatih model menjadi lebih akurat, dan disimpan terpisah dari hasil rekomendasi di atas.</p>
                 <div class="mt-4 flex flex-wrap gap-2 text-sm">
                     @foreach(($finalPreferences['design_styles'] ?? []) as $style)
                         <span class="rounded-full bg-gray-500/10 px-3 py-1 text-gray-700 dark:text-gray-300">{{ $preferenceValue($style) }}</span>
@@ -89,8 +89,8 @@
 
         @if(!empty($explanations))
             <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Mengapa UI Ini Direkomendasikan?</h2>
-                <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Nilai berikut adalah kontribusi model, bukan hubungan sebab-akibat. Faktor dengan dampak terbesar ditampilkan lebih dahulu.</p>
+                <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-2">Mengapa Tampilan Ini Direkomendasikan? (Analisis Faktor)</h2>
+                <p class="mb-6 text-sm text-gray-500 dark:text-gray-400">Angka di bawah ini menunjukkan seberapa besar pengaruh tiap karakteristik Anda terhadap keputusan sistem (bukan hubungan sebab-akibat mutlak). Faktor dengan pengaruh paling kuat ditampilkan paling atas.</p>
                 <div class="space-y-4">
                     @foreach($explanations as $explanation)
                         <div class="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/5 to-cyan-500/5 border border-indigo-500/10">
