@@ -221,6 +221,7 @@ class DummyResearchDataSeeder extends Seeder
                     'event_uuid' => (string) Str::uuid(),
                     'user_id' => $user->id,
                     'experiment_id' => $experiment->id,
+                    'protocol_version' => config('experiment.protocol_version', 'TPUIRF-PREF-v4'),
                     'task_key' => 'design_style',
                     'sequence_number' => $ev,
                     'event_type' => $ev % 2 === 0 ? 'component_clicked' : 'component_hovered',
