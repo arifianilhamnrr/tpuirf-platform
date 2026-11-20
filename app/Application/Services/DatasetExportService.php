@@ -12,6 +12,7 @@ use App\Infrastructure\Persistence\Models\ExperimentTask;
 use App\Infrastructure\Persistence\Models\InteractionEvent;
 use App\Infrastructure\Persistence\Models\ParticipantPreference;
 use App\Infrastructure\Persistence\Models\Recommendation;
+use App\Infrastructure\Persistence\Models\User;
 use Illuminate\Validation\ValidationException;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
@@ -307,10 +308,20 @@ class DatasetExportService implements DatasetExportServiceInterface
                     continue;
                 }
 
-                // A respondent becomes a training label only after their prediction
-                // has been frozen. This prevents same-respondent target leakage.
-                if ($split === 'training' && ! Recommendation::query()->where('experiment_id', $experiment->id)->exists()) {
-                    continue;
+                // Real respondents become training labels only after their own
+                // prediction is frozen. Seed rows remain eligible as bootstrap data.
+                if ($split === 'training') {
+                    $isSeed = User::query()
+                        ->whereKey($profile->userId)
+                        ->where('email', 'like', 'dummy_respondent_%@tpuirf.test')
+                        ->exists();
+                    $hasFrozenPrediction = Recommendation::query()
+                        ->where('experiment_id', $experiment->id)
+                        ->exists();
+
+                    if (! $isSeed && ! $hasFrozenPrediction) {
+                        continue;
+                    }
                 }
 
                 $events = InteractionEvent::query()->where('experiment_id', $experiment->id)->get();
