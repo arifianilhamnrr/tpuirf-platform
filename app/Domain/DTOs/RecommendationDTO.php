@@ -18,6 +18,8 @@ class RecommendationDTO
         public readonly ?array $modelOutputs,
         public readonly ?array $inputFeatures,
         public readonly ?string $modelVersion,
+        public readonly ?string $algorithm,
+        public readonly ?string $predictedAt,
         public readonly ?string $createdAt,
     ) {}
 
@@ -37,6 +39,8 @@ class RecommendationDTO
             modelOutputs: $data['model_outputs'] ?? null,
             inputFeatures: $data['input_features'] ?? null,
             modelVersion: $data['model_version'] ?? null,
+            algorithm: $data['algorithm'] ?? null,
+            predictedAt: isset($data['predicted_at']) ? (string) $data['predicted_at'] : null,
             createdAt: $data['created_at'] ?? null,
         );
     }
@@ -57,6 +61,8 @@ class RecommendationDTO
             'model_outputs' => $this->modelOutputs,
             'input_features' => $this->inputFeatures,
             'model_version' => $this->modelVersion,
+            'algorithm' => $this->algorithm,
+            'predicted_at' => $this->predictedAt,
             'created_at' => $this->createdAt,
         ];
     }

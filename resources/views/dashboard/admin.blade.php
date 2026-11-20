@@ -37,7 +37,7 @@
                 <div class="flex items-start justify-between gap-4">
                     <div>
                         <p class="text-xs font-semibold uppercase tracking-[.18em] text-indigo-600 dark:text-indigo-400">Model AI Terintegrasi</p>
-                        <h2 class="mt-2 text-xl font-bold text-gray-800 dark:text-white">Random Forest + XGBoost + SHAP</h2>
+                        <h2 class="mt-2 text-xl font-bold text-gray-800 dark:text-white">XGBoost + SHAP</h2>
                     </div>
                     <div class="flex items-center gap-2"><span class="rounded-full px-3 py-1 text-xs font-semibold {{ ($modelStatus['model_loaded'] ?? false) ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/15 text-amber-700 dark:text-amber-300' }}">{{ ($modelStatus['model_loaded'] ?? false) ? 'Model aktif' : 'Model belum aktif' }}</span><form method="POST" action="{{ route('admin.model.train') }}">@csrf<button type="submit" class="rounded-xl bg-indigo-600 px-3 py-2 text-xs font-semibold text-white">Latih Model</button></form></div>
                 </div>

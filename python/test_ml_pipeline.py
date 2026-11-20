@@ -4,7 +4,7 @@ import unittest
 
 import pandas as pd
 
-from ml_pipeline import MODEL_VERSION, TPUIRFPipeline
+from ml_pipeline import TPUIRFPipeline
 
 
 class TPUIRFPipelineTest(unittest.TestCase):
@@ -76,7 +76,7 @@ class TPUIRFPipelineTest(unittest.TestCase):
             self.assertIn("device_usage_time", pipeline.feature_names)
             self.assertEqual(set(TPUIRFPipeline.DEFAULT_TARGETS), set(prediction["recommended_config"]))
             self.assertEqual("dark", prediction["recommended_config"]["theme"])
-            self.assertEqual(MODEL_VERSION, prediction["model_version"])
+            self.assertTrue(prediction["model_version"].startswith("xgb-v4-"))
             self.assertEqual(["xgboost"], metrics["algorithms"])
             self.assertTrue(all(
                 output["algorithm"] == "xgboost"

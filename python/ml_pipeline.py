@@ -1,12 +1,13 @@
+import hashlib
 import math
 import os
 import warnings
+from datetime import datetime, timezone
 
 import joblib
 import numpy as np
 import pandas as pd
 import shap
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -14,7 +15,7 @@ from xgboost import XGBClassifier
 
 warnings.filterwarnings("ignore")
 
-MODEL_VERSION = "rf+xgboost+shap-multitarget-v3"
+MODEL_VERSION = "xgboost+shap-multitarget-v4"
 
 
 class TPUIRFPipeline:
@@ -157,6 +158,7 @@ class TPUIRFPipeline:
         self.label_encoders = {}
         self.target_encoders = {}
         self.metrics = {}
+        self.model_version = MODEL_VERSION
 
     def preprocess(self, frame, fit=False):
         frame = frame.copy()
@@ -181,7 +183,7 @@ class TPUIRFPipeline:
 
         return frame[self.feature_names].astype(float)
 
-    def train(self, data_path):
+    def train(self, data_path, save=True):
         frame = pd.read_csv(data_path)
         if frame.empty:
             raise ValueError("Dataset training masih kosong")
@@ -226,11 +228,10 @@ class TPUIRFPipeline:
                 random_state=42,
                 stratify=encoded_target,
             )
-            models = self._new_models(class_count)
-            for model in models.values():
-                model.fit(train_x, train_y)
+            model = self._new_model(class_count)
+            model.fit(train_x, train_y)
 
-            predictions = self._probabilities(models, test_x).argmax(axis=1)
+            predictions = model.predict_proba(test_x).argmax(axis=1)
             target_metrics[target] = {
                 "accuracy": float(accuracy_score(test_y, predictions)),
                 "samples": int(len(target_features)),
@@ -244,7 +245,7 @@ class TPUIRFPipeline:
                     zero_division=0,
                 ),
             }
-            trained_models[target] = models
+            trained_models[target] = model
             trained_encoders[target] = encoder
 
         if not trained_models:
@@ -253,20 +254,26 @@ class TPUIRFPipeline:
 
         self.models = trained_models
         self.target_encoders = trained_encoders
+        dataset_hash = hashlib.sha256(frame.to_csv(index=False).encode("utf-8")).hexdigest()
+        trained_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        self.model_version = f"xgb-v4-{trained_at}-{dataset_hash[:12]}"
         accuracies = [metric["accuracy"] for metric in target_metrics.values()]
         self.metrics = {
             "accuracy": float(np.mean(accuracies)),
             "target_metrics": target_metrics,
             "trained_targets": list(trained_models.keys()),
             "skipped_targets": skipped_targets,
-            "algorithms": ["random_forest", "xgboost"],
-            "model_version": MODEL_VERSION,
+            "algorithms": ["xgboost"],
+            "model_version": self.model_version,
+            "dataset_hash": dataset_hash,
+            "samples": int(len(frame)),
         }
-        self.save_model()
+        if save:
+            self.save_model()
         return self.metrics
 
     @staticmethod
-    def _new_models(class_count):
+    def _new_model(class_count):
         xgboost_options = {
             "n_estimators": 150,
             "max_depth": 5,
@@ -282,20 +289,7 @@ class TPUIRFPipeline:
         else:
             xgboost_options.update({"objective": "multi:softprob", "num_class": class_count})
 
-        return {
-            "random_forest": RandomForestClassifier(
-                n_estimators=200,
-                max_depth=10,
-                random_state=42,
-                n_jobs=1,
-            ),
-            "xgboost": XGBClassifier(**xgboost_options),
-        }
-
-    @staticmethod
-    def _probabilities(models, features):
-        probabilities = [model.predict_proba(features) for model in models.values()]
-        return np.mean(probabilities, axis=0)
+        return XGBClassifier(**xgboost_options)
 
     @staticmethod
     def _shap_values(model, features, class_index):
@@ -319,9 +313,9 @@ class TPUIRFPipeline:
         model_outputs = {}
         explanations = []
 
-        for target, models in self.models.items():
+        for target, model in self.models.items():
             encoder = self.target_encoders[target]
-            probabilities = self._probabilities(models, features)[0]
+            probabilities = model.predict_proba(features)[0]
             prediction_index = int(np.argmax(probabilities))
             prediction = str(encoder.inverse_transform([prediction_index])[0])
             confidence = float(np.max(probabilities))
@@ -331,18 +325,13 @@ class TPUIRFPipeline:
                 str(name): float(value)
                 for name, value in zip(encoder.classes_, probabilities)
             }
+            model_outputs[target] = {
+                "algorithm": "xgboost",
+                "prediction": prediction,
+                "confidence": confidence,
+            }
 
-            target_outputs = {}
-            for name, model in models.items():
-                model_probability = model.predict_proba(features)[0]
-                model_index = int(np.argmax(model_probability))
-                target_outputs[name] = {
-                    "prediction": str(encoder.inverse_transform([model_index])[0]),
-                    "confidence": float(np.max(model_probability)),
-                }
-            model_outputs[target] = target_outputs
-
-            shap_values = self._shap_values(models["xgboost"], features, prediction_index)
+            shap_values = self._shap_values(model, features, prediction_index)
             target_explanations = sorted(
                 [
                     self._explanation(
@@ -379,7 +368,7 @@ class TPUIRFPipeline:
             "features": [item["feature"] for item in sorted_explanations],
             "explanations": sorted_explanations,
             "model_outputs": model_outputs,
-            "model_version": MODEL_VERSION,
+            "model_version": self.model_version,
         }
 
     def _explanation(self, target, recommendation, feature, feature_value, shap_value):
@@ -485,12 +474,10 @@ class TPUIRFPipeline:
         if not self.models:
             return []
 
-        target_importances = {}
-        for target, models in self.models.items():
-            target_importances[target] = np.mean(
-                [model.feature_importances_ for model in models.values()],
-                axis=0,
-            )
+        target_importances = {
+            target: model.feature_importances_
+            for target, model in self.models.items()
+        }
         aggregate = np.mean(list(target_importances.values()), axis=0)
 
         return sorted(
@@ -509,24 +496,29 @@ class TPUIRFPipeline:
             reverse=True,
         )
 
-    def save_model(self):
+    def save_model(self, path=None):
         bundle = {
-            "format_version": 3,
-            "model_version": MODEL_VERSION,
+            "format_version": 4,
+            "model_version": self.model_version,
             "models": self.models,
             "label_encoders": self.label_encoders,
             "target_encoders": self.target_encoders,
             "targets": self.targets,
             "metrics": self.metrics,
         }
-        joblib.dump(bundle, os.path.join(self.model_dir, "multitarget_bundle.pkl"))
+        destination = path or os.path.join(self.model_dir, "multitarget_bundle.pkl")
+        temporary = f"{destination}.tmp"
+        joblib.dump(bundle, temporary)
+        os.replace(temporary, destination)
 
-    def load_model(self):
-        bundle = joblib.load(os.path.join(self.model_dir, "multitarget_bundle.pkl"))
-        if bundle.get("format_version") != 3:
+    def load_model(self, path=None):
+        source = path or os.path.join(self.model_dir, "multitarget_bundle.pkl")
+        bundle = joblib.load(source)
+        if bundle.get("format_version") != 4:
             raise RuntimeError("Format model tidak didukung")
         self.models = bundle["models"]
         self.label_encoders = bundle["label_encoders"]
         self.target_encoders = bundle["target_encoders"]
         self.targets = bundle["targets"]
         self.metrics = bundle["metrics"]
+        self.model_version = bundle["model_version"]

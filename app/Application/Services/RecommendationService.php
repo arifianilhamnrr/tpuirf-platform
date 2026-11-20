@@ -4,6 +4,7 @@ namespace App\Application\Services;
 
 use App\Application\Interfaces\DatasetExportServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
+use App\Application\ML\ModelDataContract;
 use App\Domain\DTOs\RecommendationDTO;
 use App\Domain\Repositories\RecommendationRepositoryInterface;
 use App\Domain\Repositories\UserProfileRepositoryInterface;
@@ -38,9 +39,9 @@ class RecommendationService implements RecommendationServiceInterface
         $experiment = Experiment::query()
             ->whereKey($experimentId)
             ->where('user_id', $userId)
-            ->with(['participantPreference', 'tasks', 'interactionEvents'])
+            ->with(['tasks', 'interactionEvents'])
             ->firstOrFail();
-        $input = $this->modelInput($userId, $experiment);
+        $input = $this->inferenceFeatures($userId, $experiment);
 
         try {
             $response = Http::timeout(30)
@@ -52,13 +53,9 @@ class RecommendationService implements RecommendationServiceInterface
             }
 
             $result = $response->json();
-            if (! isset($result['recommended_ui'], $result['confidence_score'])) {
+            if (! isset($result['recommended_ui'], $result['recommended_config'], $result['confidence_score'])) {
                 throw new RuntimeException('Respons ML tidak lengkap.');
             }
-            $result['recommended_config'] = array_replace(
-                $this->fallbackConfig($input),
-                $result['recommended_config'] ?? [],
-            );
         } catch (\Throwable $exception) {
             report($exception);
             $result = $this->fallbackResult($input);
@@ -79,7 +76,7 @@ class RecommendationService implements RecommendationServiceInterface
         $dataPath = null;
 
         try {
-            $dataPath = $this->datasetExportService->exportCsv('full');
+            $dataPath = $this->datasetExportService->exportCsv('training');
 
             return Http::timeout(300)
                 ->post(config('app.ml_service_url', 'http://localhost:5000').'/train', ['data_path' => $dataPath])
@@ -115,16 +112,12 @@ class RecommendationService implements RecommendationServiceInterface
         return array_is_list($result) ? $result : [];
     }
 
-    private function modelInput(string $userId, Experiment $experiment): array
+    private function inferenceFeatures(string $userId, Experiment $experiment): array
     {
         $profile = $this->profileRepository->findByUserId($userId);
-        $preferences = $experiment->participantPreference?->final_config ?? [];
         $events = $experiment->interactionEvents;
         $tasks = $experiment->tasks;
-
-        return [
-            'user_id' => $userId,
-            'experiment_id' => $experiment->id,
+        $features = [
             'age' => $profile?->age,
             'gender' => $profile?->gender,
             'education' => $profile?->education,
@@ -143,15 +136,9 @@ class RecommendationService implements RecommendationServiceInterface
             'keyboard_count' => $events->where('input_method', 'keyboard')->count(),
             'avg_task_time' => (float) ($tasks->avg('active_duration_ms') ?? 0),
             'total_session_time' => (int) $experiment->total_active_duration_ms,
-            'theme' => $preferences['theme'] ?? null,
-            'color_palette' => $preferences['color_palette'] ?? null,
-            'font_family' => $preferences['font_family'] ?? null,
-            'font_size' => $preferences['font_size'] ?? null,
-            'layout_density' => $preferences['layout_density'] ?? null,
-            'navigation_position' => $preferences['navigation_position'] ?? null,
-            'icon_style' => $preferences['icon_style'] ?? null,
-            'design_style' => implode('|', $preferences['design_styles'] ?? []),
         ];
+
+        return array_intersect_key($features, array_flip(ModelDataContract::FEATURES));
     }
 
     private function persistResult(string $userId, ?string $experimentId, array $result, array $input): RecommendationDTO
@@ -169,6 +156,8 @@ class RecommendationService implements RecommendationServiceInterface
             'model_outputs' => $result['model_outputs'] ?? null,
             'input_features' => $input,
             'model_version' => $result['model_version'] ?? 'unknown',
+            'algorithm' => 'xgboost',
+            'predicted_at' => now(),
         ];
 
         $recommendation = $experimentId
@@ -180,37 +169,23 @@ class RecommendationService implements RecommendationServiceInterface
 
     private function fallbackResult(array $input): array
     {
-        $recommendedConfig = $this->fallbackConfig($input);
+        $recommendedUi = match ($input['visual_preference'] ?? null) {
+            'vibrant' => 'high_contrast_brutalist',
+            'classic' => 'material_elevated',
+            default => 'minimal_flat',
+        };
 
         return [
-            'recommended_ui' => $recommendedConfig['design_style'] ?? match ($input['visual_preference'] ?? null) {
-                'minimal' => 'minimal_flat', 'vibrant' => 'high_contrast_brutalist', 'classic' => 'material_elevated', default => 'minimal_flat',
-            },
-            'recommended_config' => $recommendedConfig,
+            'recommended_ui' => $recommendedUi,
+            'recommended_config' => ['design_style' => $recommendedUi],
             'confidence_score' => 0,
             'confidence_by_target' => [],
             'shap_values' => [],
             'features' => [],
             'explanations' => [],
             'model_outputs' => ['status' => 'ml_service_unavailable'],
-            'model_version' => 'fallback-untrained-model',
+            'model_version' => 'fallback-profile-only',
         ];
-    }
-
-    private function fallbackConfig(array $input): array
-    {
-        $config = [
-            'theme' => $input['theme'] ?? null,
-            'color_palette' => $input['color_palette'] ?? null,
-            'font_family' => $input['font_family'] ?? null,
-            'font_size' => $input['font_size'] ?? null,
-            'layout_density' => $input['layout_density'] ?? null,
-            'navigation_position' => $input['navigation_position'] ?? null,
-            'icon_style' => $input['icon_style'] ?? null,
-            'design_style' => explode('|', (string) ($input['design_style'] ?? ''))[0] ?: null,
-        ];
-
-        return array_filter($config, static fn ($value) => $value !== null && $value !== '');
     }
 
     private function modelRequest(string $path): array

@@ -99,7 +99,7 @@ class SyncExperimentToGoogleSheetsJob implements ShouldQueue
             'pref_design_style' => is_array($preferences['design_styles'] ?? null)
                 ? implode(' | ', $preferences['design_styles'])
                 : ($preferences['design_style'] ?? ''),
-            'ml_model' => $this->recommendationData['model_version'] ?? 'rf+xgboost+shap',
+            'ml_model' => $this->recommendationData['model_version'] ?? 'xgboost+shap',
             'pred_design_style' => $recConfig['design_style'] ?? ($this->recommendationData['recommended_ui'] ?? ''),
             'pred_confidence' => $confidence,
             'shap_top_features' => $shapSummary,

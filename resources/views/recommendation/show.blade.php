@@ -38,7 +38,7 @@
                             <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Konfigurasi Pilihan Sistem (AI)</h2>
                             <span class="rounded-full px-3 py-1 text-xs font-semibold {{ $usingFallback ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300' : 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' }}">{{ $usingFallback ? 'Ringkasan sementara' : 'Prediksi AI' }}</span>
                         </div>
-                        <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $usingFallback ? 'Sistem sementara memakai pilihan preferensi akhir Anda selagi data model terus dihimpun.' : 'Model pintar kami (kombinasi Random Forest dan XGBoost) menyepakati susunan antarmuka berikut dengan tingkat kecocokan ' . number_format($recommendation->confidenceScore * 100, 1) . '%:' }}</p>
+                        <p class="mt-1 text-gray-500 dark:text-gray-400">{{ $usingFallback ? 'Rekomendasi AI belum tersedia; sistem menampilkan susunan sementara berbasis profil tanpa memakai pilihan manual Anda.' : 'XGBoost menyusun antarmuka berikut dari profil dan pola interaksi Anda, dengan tingkat kecocokan ' . number_format($recommendation->confidenceScore * 100, 1) . '%:' }}</p>
                         <div class="mt-3 flex flex-wrap gap-2 text-sm">
                             @if(!empty($recommendedConfig['design_style']))
                                 <span class="rounded-full bg-indigo-500/10 px-3 py-1 font-medium text-indigo-700 dark:text-indigo-300">{{ $preferenceValue($recommendedConfig['design_style']) }}</span>

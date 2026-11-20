@@ -66,8 +66,8 @@ class PreferenceExperimentBackendTest extends TestCase
             '*/health' => Http::response([
                 'status' => 'healthy',
                 'model_loaded' => true,
-                'models' => ['random_forest', 'xgboost'],
-                'model_version' => 'rf+xgboost+shap-multitarget-v3',
+                'models' => ['xgboost'],
+                'model_version' => 'xgb-v4-test-snapshot',
                 'accuracy' => 0.88,
                 'targets' => ['theme', 'font_family', 'design_style'],
             ]),
@@ -91,7 +91,7 @@ class PreferenceExperimentBackendTest extends TestCase
             'user_name' => $admin->name,
         ])->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Random Forest + XGBoost + SHAP')
+            ->assertSee('XGBoost + SHAP')
             ->assertSee('Model aktif')
             ->assertSee('Theme');
     }

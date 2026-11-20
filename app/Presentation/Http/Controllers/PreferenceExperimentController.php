@@ -5,6 +5,7 @@ namespace App\Presentation\Http\Controllers;
 use App\Application\Interfaces\PreferenceExperimentServiceInterface;
 use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Application\Interfaces\ExplainabilityServiceInterface;
+use App\Application\Jobs\RetrainRecommendationModelJob;
 use App\Application\Jobs\SyncExperimentToGoogleSheetsJob;
 use App\Presentation\Http\Requests\InteractionEventBatchRequest;
 use App\Presentation\Http\Requests\StartPreferenceExperimentRequest;
@@ -110,7 +111,7 @@ class PreferenceExperimentController extends Controller
             $experimentId,
         );
 
-        $this->recommendationService->trainModel();
+        // Freeze the current respondent's prediction using the previously active model.
         $recommendation = $this->recommendationService->generateForExperiment($userId, $experimentId);
 
         $explanations = [];
@@ -123,8 +124,10 @@ class PreferenceExperimentController extends Controller
         $recData = $recommendation->toArray();
         $recData['explanations'] = $explanations;
 
-        // Sync hasil eksperimen & ML ke Google Sheets di background queue
-        SyncExperimentToGoogleSheetsJob::dispatch($userId, $experimentId, $recData);
+        // Sync the frozen prediction, then make this respondent's manual labels
+        // available to the next XGBoost model version.
+        SyncExperimentToGoogleSheetsJob::dispatch($userId, $experimentId, $recData)->afterCommit();
+        RetrainRecommendationModelJob::dispatch($experimentId)->afterCommit();
 
         return response()->json([
             'data' => $experiment,

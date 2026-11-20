@@ -193,7 +193,7 @@ class AdminController extends Controller
 
         return redirect()->route('admin.dashboard')->with(
             $trained ? 'success' : 'error',
-            $trained ? 'Model multi-target Random Forest dan XGBoost berhasil dilatih.' : 'Training gagal. Pastikan service ML aktif dan setiap kelas target memiliki cukup data.',
+            $trained ? 'Model multi-target XGBoost berhasil dilatih.' : 'Training gagal. Model aktif sebelumnya tetap digunakan; pastikan service ML aktif dan setiap kelas target memiliki cukup data.',
         );
     }
 

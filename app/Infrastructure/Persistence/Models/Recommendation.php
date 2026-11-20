@@ -23,6 +23,8 @@ class Recommendation extends Model
         'model_outputs',
         'input_features',
         'model_version',
+        'algorithm',
+        'predicted_at',
     ];
 
     protected function casts(): array
@@ -36,6 +38,7 @@ class Recommendation extends Model
             'model_outputs' => 'array',
             'input_features' => 'array',
             'confidence_score' => 'float',
+            'predicted_at' => 'datetime',
         ];
     }
 

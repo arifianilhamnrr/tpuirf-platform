@@ -11,6 +11,7 @@ use App\Domain\Repositories\UserProfileRepositoryInterface;
 use App\Infrastructure\Persistence\Models\ExperimentTask;
 use App\Infrastructure\Persistence\Models\InteractionEvent;
 use App\Infrastructure\Persistence\Models\ParticipantPreference;
+use App\Infrastructure\Persistence\Models\Recommendation;
 use Illuminate\Validation\ValidationException;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
@@ -46,10 +47,10 @@ class DatasetExportService implements DatasetExportServiceInterface
         }
 
         $file = fopen($filename, 'w');
-        fputcsv($file, $data['headers']);
+        fputcsv($file, $data['headers'], ',', '"', '\\');
 
         foreach ($data['rows'] as $row) {
-            fputcsv($file, $this->spreadsheetSafeRow($row));
+            fputcsv($file, $this->spreadsheetSafeRow($row), ',', '"', '\\');
         }
 
         fclose($file);
@@ -306,6 +307,12 @@ class DatasetExportService implements DatasetExportServiceInterface
                     continue;
                 }
 
+                // A respondent becomes a training label only after their prediction
+                // has been frozen. This prevents same-respondent target leakage.
+                if ($split === 'training' && ! Recommendation::query()->where('experiment_id', $experiment->id)->exists()) {
+                    continue;
+                }
+
                 $events = InteractionEvent::query()->where('experiment_id', $experiment->id)->get();
                 $trustEval = $this->trustRepository->findByExperimentId($experiment->id);
                 $preference = ParticipantPreference::query()->where('experiment_id', $experiment->id)->first();
@@ -354,10 +361,7 @@ class DatasetExportService implements DatasetExportServiceInterface
             }
         }
 
-        if ($split === 'training') {
-            $splitIndex = (int) (count($rows) * 0.8);
-            $rows = array_slice($rows, 0, $splitIndex);
-        } elseif ($split === 'testing') {
+        if ($split === 'testing') {
             $splitIndex = (int) (count($rows) * 0.8);
             $rows = array_slice($rows, $splitIndex);
         }
