@@ -77,6 +77,16 @@ class TPUIRFPipelineTest(unittest.TestCase):
             self.assertEqual(set(TPUIRFPipeline.DEFAULT_TARGETS), set(prediction["recommended_config"]))
             self.assertEqual("dark", prediction["recommended_config"]["theme"])
             self.assertEqual(MODEL_VERSION, prediction["model_version"])
+            self.assertEqual(["xgboost"], metrics["algorithms"])
+            self.assertTrue(all(
+                output["algorithm"] == "xgboost"
+                for output in prediction["model_outputs"].values()
+            ))
+            self.assertTrue(all(
+                item["feature"] in TPUIRFPipeline.FEATURE_NAMES
+                and item["feature"] not in TPUIRFPipeline.DEFAULT_TARGETS
+                for item in prediction["explanations"]
+            ))
             self.assertTrue(any(
                 item["target"] == "theme"
                 and item["feature"] == "device_usage_time"

@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Application\Jobs\RetrainRecommendationModelJob;
 use App\Infrastructure\Persistence\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -96,6 +98,7 @@ class PreferenceExperimentBackendTest extends TestCase
 
     public function test_it_persists_all_preferences_evaluation_and_completion(): void
     {
+        Queue::fake();
         Http::fake([
             '*/train' => Http::response(['status' => 'trained', 'accuracy' => 0.85]),
             '*/predict' => Http::response([
@@ -120,11 +123,12 @@ class PreferenceExperimentBackendTest extends TestCase
                 ],
                 'model_outputs' => [
                     'theme' => [
-                        'random_forest' => ['prediction' => 'dark', 'confidence' => 0.82],
-                        'xgboost' => ['prediction' => 'dark', 'confidence' => 0.92],
+                        'algorithm' => 'xgboost',
+                        'prediction' => 'dark',
+                        'confidence' => 0.92,
                     ],
                 ],
-                'model_version' => 'rf+xgboost+shap-multitarget-v3',
+                'model_version' => 'xgb-v4-test-snapshot',
             ]),
         ]);
         $experiment = $this->startExperiment();
@@ -215,7 +219,15 @@ class PreferenceExperimentBackendTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.status', 'completed');
 
-        Http::assertSent(fn ($request) => str_contains($request->url(), '/train'));
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/predict'));
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), '/train'));
+        Queue::assertPushed(RetrainRecommendationModelJob::class);
+
+        $predictRequest = collect(Http::recorded())
+            ->first(fn (array $recorded) => str_contains($recorded[0]->url(), '/predict'))[0];
+        foreach (['theme', 'color_palette', 'font_family', 'font_size', 'layout_density', 'navigation_position', 'icon_style', 'design_style'] as $target) {
+            $this->assertArrayNotHasKey($target, $predictRequest->data());
+        }
 
         $this->assertDatabaseHas('trust_evaluations', [
             'experiment_id' => $experimentId,
@@ -236,19 +248,21 @@ class PreferenceExperimentBackendTest extends TestCase
             'experiment_id' => $experimentId,
             'user_id' => $this->user->id,
             'recommended_ui' => 'minimal_flat',
-            'model_version' => 'rf+xgboost+shap-multitarget-v3',
+            'model_version' => 'xgb-v4-test-snapshot',
         ]);
         $recommendation = $this->user->recommendations()->where('experiment_id', $experimentId)->firstOrFail();
         $this->assertSame('device_usage_time', $recommendation->explanations[0]['feature']);
-        $this->assertSame('dark', $recommendation->input_features['theme']);
+        foreach (['theme', 'color_palette', 'font_family', 'font_size', 'layout_density', 'navigation_position', 'icon_style', 'design_style'] as $target) {
+            $this->assertArrayNotHasKey($target, $recommendation->input_features);
+        }
         $this->assertSame('evening', $recommendation->input_features['device_usage_time']);
         $this->assertSame('high_legibility', $recommendation->recommended_config['font_family']);
         $this->assertSame(0.91, $recommendation->confidence_by_target['theme']);
-        $this->assertArrayHasKey('random_forest', $recommendation->model_outputs['theme']);
+        $this->assertSame('xgboost', $recommendation->model_outputs['theme']['algorithm']);
 
         $this->get(route('respondent.recommendation.show'))
             ->assertOk()
-            ->assertSee('Konfigurasi Rekomendasi Model')
+            ->assertSee('Konfigurasi Pilihan Sistem (AI)')
             ->assertSee('Waktu Penggunaan Utama')
             ->assertSee('Tema')
             ->assertSee('sore');
