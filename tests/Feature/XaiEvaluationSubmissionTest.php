@@ -8,6 +8,8 @@ use App\Infrastructure\Persistence\Models\Experiment;
 use App\Infrastructure\Persistence\Models\Recommendation;
 use App\Infrastructure\Persistence\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
@@ -83,6 +85,26 @@ class XaiEvaluationSubmissionTest extends TestCase
             ->assertUnprocessable();
 
         $this->assertDatabaseCount('xai_evaluations', 0);
+    }
+
+    public function test_xai_sheet_sync_never_falls_back_to_primary_dataset_webhook(): void
+    {
+        Http::fake();
+        Log::spy();
+        config()->set('services.google_sheets.webhook_url', 'https://example.test/primary');
+        config()->set('services.google_sheets.xai_webhook_url', null);
+        [, , $recommendation] = $this->fixture();
+        $evaluation = $recommendation->xaiEvaluation()->create($this->validPayload() + [
+            'user_id' => $recommendation->user_id,
+            'experiment_id' => $recommendation->experiment_id,
+            'instrument_version' => config('xai_evaluation.instrument_version'),
+            'submitted_at' => now(),
+        ]);
+
+        (new SyncXaiEvaluationToGoogleSheetsJob($evaluation->id))->handle();
+
+        Http::assertNothingSent();
+        Log::shouldHaveReceived('info')->once();
     }
 
     public function test_resubmission_updates_same_row(): void

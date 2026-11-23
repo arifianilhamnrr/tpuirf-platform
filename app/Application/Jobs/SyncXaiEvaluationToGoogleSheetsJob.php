@@ -22,9 +22,13 @@ class SyncXaiEvaluationToGoogleSheetsJob implements ShouldQueue
 
     public function handle(): void
     {
-        $webhookUrl = config('services.google_sheets.webhook_url');
+        $webhookUrl = config('services.google_sheets.xai_webhook_url');
         $evaluation = XaiEvaluation::with('recommendation')->find($this->xaiEvaluationId);
-        if (! $webhookUrl || ! $evaluation) {
+        if (! $webhookUrl) {
+            Log::info('XAI evaluation Google Sheets sync skipped: GOOGLE_SHEETS_XAI_WEBHOOK_URL is not configured.');
+            return;
+        }
+        if (! $evaluation) {
             return;
         }
 

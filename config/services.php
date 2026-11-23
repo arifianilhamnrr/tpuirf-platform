@@ -37,6 +37,7 @@ return [
 
     'google_sheets' => [
         'webhook_url' => env('GOOGLE_SHEETS_WEBHOOK_URL'),
+        'xai_webhook_url' => env('GOOGLE_SHEETS_XAI_WEBHOOK_URL'),
     ],
 
 ];
