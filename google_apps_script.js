@@ -9,9 +9,33 @@ function doPost(e) {
   }
 
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     var data = JSON.parse(e.postData.contents);
 
+    if (data.record_type === "xai_evaluation") {
+      var sheetName = "XAI_Evaluations";
+      var sheet = spreadsheet.getSheetByName(sheetName) || spreadsheet.insertSheet(sheetName);
+      var headers = [
+        "participant_id", "experiment_id", "recommendation_id", "model_version",
+        "instrument_version", "submitted_at", "perceived_transparency", "system_trust",
+        "decision_confidence", "overall_satisfaction", "explanation_understandability",
+        "causal_attribution_coherence", "perceived_scrutability", "cognitive_load_appropriateness"
+      ];
+      if (sheet.getLastRow() === 0) sheet.appendRow(headers);
+      var row = headers.map(function(key) { return data[key] === undefined ? "" : data[key]; });
+      var recommendationIds = sheet.getLastRow() > 1
+        ? sheet.getRange(2, 3, sheet.getLastRow() - 1, 1).getValues().flat()
+        : [];
+      var existingIndex = recommendationIds.indexOf(data.recommendation_id);
+      if (existingIndex >= 0) {
+        sheet.getRange(existingIndex + 2, 1, 1, row.length).setValues([row]);
+        return ContentService.createTextOutput(JSON.stringify({status: "success", row: existingIndex + 2, action: "updated"})).setMimeType(ContentService.MimeType.JSON);
+      }
+      sheet.appendRow(row);
+      return ContentService.createTextOutput(JSON.stringify({status: "success", row: sheet.getLastRow(), action: "inserted"})).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    var sheet = spreadsheet.getActiveSheet();
     // Pemetaan 34 kolom sesuai schema tpuirf-platform & ML pipeline
     var row = [
       data.timestamp || new Date().toISOString(),

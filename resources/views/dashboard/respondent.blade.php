@@ -81,6 +81,18 @@
             </div>
         </div>
 
+        @if($recommendation)
+            <div class="rounded-3xl border p-6 shadow-xl {{ $xaiEvaluation ? 'border-emerald-500/20 bg-emerald-500/10' : 'border-amber-500/20 bg-amber-500/10' }}">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold {{ $xaiEvaluation ? 'text-emerald-700 dark:text-emerald-300' : 'text-amber-700 dark:text-amber-300' }}">Evaluasi rekomendasi {{ $xaiEvaluation ? 'sudah dikirim' : 'belum diisi' }}</p>
+                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ $xaiEvaluation ? 'Terima kasih. Jawaban Anda sudah tersimpan sebagai data evaluasi XAI.' : 'Nilai rekomendasi dan penjelasan AI setelah Anda membacanya.' }}</p>
+                    </div>
+                    <a href="{{ route('respondent.recommendation.show') }}#evaluasi-xai" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-2xl px-5 py-2.5 text-sm font-semibold text-white {{ $xaiEvaluation ? 'bg-emerald-600' : 'bg-amber-600' }}">{{ $xaiEvaluation ? 'Lihat Evaluasi' : 'Isi Evaluasi Akhir' }}</a>
+                </div>
+            </div>
+        @endif
+
         @if($profileComplete)
         @if($researchCompleted)
             <div class="backdrop-blur-xl bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 dark:from-emerald-500/20 dark:to-cyan-500/20 rounded-3xl p-8 border border-emerald-500/20 shadow-xl">

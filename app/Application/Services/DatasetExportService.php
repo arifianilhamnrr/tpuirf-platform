@@ -13,6 +13,7 @@ use App\Infrastructure\Persistence\Models\InteractionEvent;
 use App\Infrastructure\Persistence\Models\ParticipantPreference;
 use App\Infrastructure\Persistence\Models\Recommendation;
 use App\Infrastructure\Persistence\Models\User;
+use App\Infrastructure\Persistence\Models\XaiEvaluation;
 use Illuminate\Validation\ValidationException;
 use OpenSpout\Common\Entity\Row;
 use OpenSpout\Writer\XLSX\Writer;
@@ -27,6 +28,7 @@ class DatasetExportService implements DatasetExportServiceInterface
         'task-summary',
         'transitions',
         'preferences',
+        'xai-evaluations',
     ];
 
     public function __construct(
@@ -134,6 +136,7 @@ class DatasetExportService implements DatasetExportServiceInterface
             'task-summary' => $this->buildTaskSummaryDataset(),
             'transitions' => $this->buildTransitionDataset(),
             'preferences' => $this->buildPreferenceDataset(),
+            'xai-evaluations' => $this->buildXaiEvaluationDataset(),
             default => $this->getFullDataset(),
         };
     }
@@ -264,6 +267,42 @@ class DatasetExportService implements DatasetExportServiceInterface
                 $preference->design_style,
                 $preference->final_config ? json_encode($preference->final_config) : null,
             ])
+            ->values()
+            ->toArray();
+
+        return compact('headers', 'rows');
+    }
+
+    private function buildXaiEvaluationDataset(): array
+    {
+        $items = array_keys(config('xai_evaluation.items'));
+        $headers = [
+            'participant_id', 'experiment_id', 'recommendation_id', 'model_version',
+            'algorithm', 'predicted_at', 'instrument_version', 'submitted_at',
+            ...$items,
+            'xai_mean_score', 'recommendation_quality_mean', 'explanation_quality_mean',
+        ];
+        $rows = XaiEvaluation::query()
+            ->with('recommendation:id,model_version,algorithm,predicted_at')
+            ->orderBy('submitted_at')
+            ->get()
+            ->map(function (XaiEvaluation $evaluation) use ($items): array {
+                $scores = array_map(fn (string $key) => $evaluation->{$key}, $items);
+                return [
+                    $evaluation->user_id,
+                    $evaluation->experiment_id,
+                    $evaluation->recommendation_id,
+                    $evaluation->recommendation?->model_version,
+                    $evaluation->recommendation?->algorithm,
+                    $evaluation->recommendation?->predicted_at?->toISOString(),
+                    $evaluation->instrument_version,
+                    $evaluation->submitted_at?->toISOString(),
+                    ...$scores,
+                    round(array_sum($scores) / count($scores), 2),
+                    round(array_sum(array_slice($scores, 0, 4)) / 4, 2),
+                    round(array_sum(array_slice($scores, 4, 4)) / 4, 2),
+                ];
+            })
             ->values()
             ->toArray();
 

@@ -53,6 +53,9 @@ Route::middleware(['auth.session'])->group(function () {
             Route::get('/experiment/complete', [ExperimentController::class, 'complete'])->name('experiment.complete');
             Route::get('/recommendation', [RecommendationController::class, 'show'])->name('recommendation.show');
             Route::post('/recommendation/generate', [RecommendationController::class, 'generate'])->name('recommendation.generate');
+            Route::post('/recommendation/xai-evaluation', [RecommendationController::class, 'storeXaiEvaluation'])
+                ->middleware('throttle:10,1')
+                ->name('recommendation.xai-evaluation.store');
         });
     });
 

@@ -61,6 +61,11 @@ class User extends Authenticatable
         return $this->hasMany(TrustEvaluation::class);
     }
 
+    public function xaiEvaluations()
+    {
+        return $this->hasMany(XaiEvaluation::class);
+    }
+
     public function participantPreferences()
     {
         return $this->hasMany(ParticipantPreference::class);

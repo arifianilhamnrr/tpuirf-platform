@@ -22,6 +22,7 @@ class AnalyticsController extends Controller
         $clickDistribution = $this->analyticsService->getClickDistribution();
         $taskDurationStats = $this->analyticsService->getTaskDurationStats();
         $datasetGrowth = $this->analyticsService->getDatasetGrowth();
+        $xaiEvaluationStats = $this->analyticsService->getXaiEvaluationStats();
 
         return view('analytics.index', compact(
             'stats',
@@ -32,6 +33,7 @@ class AnalyticsController extends Controller
             'clickDistribution',
             'taskDurationStats',
             'datasetGrowth',
+            'xaiEvaluationStats',
         ));
     }
 }

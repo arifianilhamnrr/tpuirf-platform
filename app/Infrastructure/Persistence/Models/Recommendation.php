@@ -51,4 +51,9 @@ class Recommendation extends Model
     {
         return $this->belongsTo(Experiment::class);
     }
+
+    public function xaiEvaluation()
+    {
+        return $this->hasOne(XaiEvaluation::class);
+    }
 }

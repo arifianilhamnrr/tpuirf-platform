@@ -112,6 +112,49 @@
             </div>
         @endif
 
+        @if($recommendation && !$usingFallback)
+            <section id="evaluasi-xai" class="scroll-mt-24 backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 sm:p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
+                <div class="max-w-3xl">
+                    <p class="text-xs font-semibold uppercase tracking-[.18em] text-indigo-600 dark:text-indigo-400">Evaluasi Akhir</p>
+                    <h2 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white">Evaluasi Rekomendasi dan Penjelasan AI</h2>
+                    <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">Setelah melihat rekomendasi dan analisis faktor di atas, berikan penilaian Anda pada setiap pernyataan berikut. Pilih satu jawaban dari 1 (Sangat Tidak Setuju) sampai 5 (Sangat Setuju).</p>
+                    <p id="xai-scale-guide" class="mt-2 text-xs leading-5 text-gray-500 dark:text-gray-400">Jawaban ini digunakan untuk mengevaluasi kualitas rekomendasi dan penjelasan AI. Jawaban tidak mengubah rekomendasi yang sudah Anda terima dan tidak digunakan sebagai input prediksi untuk sesi ini.</p>
+                </div>
+
+                @if(session('success'))
+                    <div role="status" class="mt-5 rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm font-medium text-emerald-700 dark:text-emerald-300">{{ session('success') }}</div>
+                @endif
+
+                <form method="POST" action="{{ route('respondent.recommendation.xai-evaluation.store') }}" class="mt-7 space-y-6">
+                    @csrf
+                    @foreach($xaiItems as $key => $item)
+                        <fieldset class="rounded-2xl border border-gray-200/80 bg-white/60 p-4 sm:p-5 dark:border-gray-700 dark:bg-gray-900/30" aria-describedby="xai-scale-guide {{ $errors->has($key) ? $key.'-error' : '' }}">
+                            <legend class="w-full px-1">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">{{ $loop->iteration }}. {{ $item['construct'] }}</span>
+                                <span class="mt-2 block text-sm font-semibold leading-6 text-gray-800 dark:text-white">{{ $item['statement'] }}</span>
+                            </legend>
+                            <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-5">
+                                @foreach($xaiScale as $score => $label)
+                                    @php $selected = (int) old($key, $xaiEvaluation?->{$key}) === (int) $score; @endphp
+                                    <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition {{ $selected ? 'border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'border-gray-200 bg-white/70 text-gray-600 hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300' }}">
+                                        <input type="radio" name="{{ $key }}" value="{{ $score }}" class="h-5 w-5 shrink-0 text-indigo-600 focus:ring-indigo-500" {{ $selected ? 'checked' : '' }} required>
+                                        <span><strong>{{ $score }}</strong><span class="block text-xs leading-4">{{ $label }}</span></span>
+                                    </label>
+                                @endforeach
+                            </div>
+                            @error($key)<p id="{{ $key }}-error" class="mt-2 text-sm text-red-600" role="alert">{{ $message }}</p>@enderror
+                        </fieldset>
+                    @endforeach
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ $xaiEvaluation ? 'Jawaban sebelumnya akan diperbarui tanpa membuat data duplikat.' : 'Semua pernyataan wajib dijawab.' }}</p>
+                        <button type="submit" class="inline-flex min-h-12 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-7 py-3 font-semibold text-white shadow-lg shadow-indigo-500/20 transition hover:from-indigo-700 hover:to-cyan-600">
+                            {{ $xaiEvaluation ? 'Perbarui Evaluasi' : 'Kirim Evaluasi' }}
+                        </button>
+                    </div>
+                </form>
+            </section>
+        @endif
+
         @if(!$recommendation)
             <form method="POST" action="{{ route('respondent.recommendation.generate') }}" class="text-center">
                 @csrf

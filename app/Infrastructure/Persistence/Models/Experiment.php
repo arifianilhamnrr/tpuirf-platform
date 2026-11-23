@@ -73,4 +73,9 @@ class Experiment extends Model
     {
         return $this->hasOne(ParticipantPreference::class);
     }
+
+    public function xaiEvaluation()
+    {
+        return $this->hasOne(XaiEvaluation::class);
+    }
 }

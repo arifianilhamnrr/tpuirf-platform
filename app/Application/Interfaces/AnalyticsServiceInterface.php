@@ -23,4 +23,6 @@ interface AnalyticsServiceInterface
     public function getTransparencyScore(): float;
 
     public function getDatasetGrowth(): array;
+
+    public function getXaiEvaluationStats(): array;
 }

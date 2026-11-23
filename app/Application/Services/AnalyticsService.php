@@ -10,6 +10,8 @@ use App\Domain\Repositories\TrustEvaluationRepositoryInterface;
 use App\Domain\Repositories\UserRepositoryInterface;
 use App\Infrastructure\Persistence\Models\ExperimentTask;
 use App\Infrastructure\Persistence\Models\InteractionEvent;
+use App\Infrastructure\Persistence\Models\Recommendation;
+use App\Infrastructure\Persistence\Models\XaiEvaluation;
 
 class AnalyticsService implements AnalyticsServiceInterface
 {
@@ -104,5 +106,31 @@ class AnalyticsService implements AnalyticsServiceInterface
             ->orderBy('event_date')
             ->pluck('event_count', 'event_date')
             ->toArray();
+    }
+
+    public function getXaiEvaluationStats(): array
+    {
+        $items = array_keys(config('xai_evaluation.items'));
+        $totalRecommendations = Recommendation::query()->whereNotNull('predicted_at')->count();
+        $totalSubmitted = XaiEvaluation::query()->count();
+        $means = [];
+        $distributions = [];
+        foreach ($items as $item) {
+            $means[$item] = round((float) (XaiEvaluation::query()->avg($item) ?? 0), 2);
+            $counts = XaiEvaluation::query()
+                ->selectRaw("{$item} as score, COUNT(*) as aggregate")
+                ->groupBy($item)
+                ->pluck('aggregate', 'score')
+                ->toArray();
+            $distributions[$item] = array_replace(array_fill_keys(range(1, 5), 0), $counts);
+        }
+
+        return [
+            'total_submitted' => $totalSubmitted,
+            'total_recommendations' => $totalRecommendations,
+            'completion_rate' => $totalRecommendations > 0 ? round($totalSubmitted / $totalRecommendations * 100, 1) : 0,
+            'means' => $means,
+            'distributions' => $distributions,
+        ];
     }
 }

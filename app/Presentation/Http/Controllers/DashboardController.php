@@ -10,6 +10,7 @@ use App\Application\Interfaces\RecommendationServiceInterface;
 use App\Application\Interfaces\UserProfileServiceInterface;
 use App\Infrastructure\Persistence\Models\TrustEvaluation;
 use App\Infrastructure\Persistence\Models\Recommendation;
+use App\Infrastructure\Persistence\Models\XaiEvaluation;
 use Illuminate\Routing\Controller;
 use Illuminate\View\View;
 
@@ -37,6 +38,9 @@ class DashboardController extends Controller
             ->where('user_id', $user->id)
             ->latest()
             ->first();
+        $xaiEvaluation = $recommendation?->id
+            ? XaiEvaluation::query()->where('recommendation_id', $recommendation->id)->first()
+            : null;
         $profileComplete = $this->userProfileService->isProfileComplete($user->id);
 
         return view('dashboard.respondent', compact(
@@ -46,6 +50,7 @@ class DashboardController extends Controller
             'recommendation',
             'finalPreferences',
             'trustEvaluation',
+            'xaiEvaluation',
             'profileComplete',
         ));
     }
