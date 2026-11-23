@@ -66,6 +66,29 @@
         </div>
 
         <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 border border-white/20 dark:border-gray-700/30 shadow-xl">
+            <div class="flex flex-col gap-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-800 dark:text-white">Evaluasi XAI Pascarekomendasi</h2>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ $xaiEvaluationStats['total_submitted'] }} dari {{ $xaiEvaluationStats['total_recommendations'] }} rekomendasi telah dinilai.</p>
+                    </div>
+                    <div class="rounded-2xl bg-indigo-500/10 px-5 py-3 text-center">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">Tingkat Penyelesaian</p>
+                        <p class="text-2xl font-bold text-indigo-700 dark:text-indigo-300">{{ number_format($xaiEvaluationStats['completion_rate'], 1) }}%</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach(config('xai_evaluation.items') as $key => $item)
+                        <div class="rounded-2xl bg-gray-50 p-4 dark:bg-gray-900/50">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">{{ $item['construct'] }}</p>
+                            <p class="mt-2 text-2xl font-bold text-gray-800 dark:text-white">{{ number_format($xaiEvaluationStats['means'][$key] ?? 0, 2) }}<span class="text-sm font-normal text-gray-400"> / 5</span></p>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 border border-white/20 dark:border-gray-700/30 shadow-xl">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div><h2 class="text-lg font-bold text-gray-800 dark:text-white">Ekspor Dataset Penelitian</h2><p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Identitas partisipan memakai kode eksperimen, tanpa nama atau tanggal lahir.</p></div>
                 <div class="flex flex-wrap gap-2">
@@ -73,6 +96,7 @@
                     <a href="{{ route('export.csv', ['type' => 'task-summary']) }}" class="px-4 py-2 rounded-xl bg-cyan-600 text-white text-sm font-semibold">Ringkasan Tugas</a>
                     <a href="{{ route('export.csv', ['type' => 'transitions']) }}" class="px-4 py-2 rounded-xl bg-purple-600 text-white text-sm font-semibold">Transisi</a>
                     <a href="{{ route('export.csv', ['type' => 'preferences']) }}" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold">Preferensi</a>
+                    <a href="{{ route('export.csv', ['type' => 'xai-evaluations']) }}" class="px-4 py-2 rounded-xl bg-rose-600 text-white text-sm font-semibold">Evaluasi XAI</a>
                 </div>
             </div>
         </div>
