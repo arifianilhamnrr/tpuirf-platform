@@ -56,7 +56,7 @@ class XaiEvaluationSubmissionTest extends TestCase
     public function test_respondent_cannot_submit_evaluation_for_another_respondents_recommendation(): void
     {
         [$owner] = $this->fixture();
-        $intruder = User::factory()->create(['role' => 'respondent']);
+        $intruder = $this->createRespondent('intruder');
 
         $this->withSession([
             'user_id' => $intruder->id,
@@ -82,7 +82,7 @@ class XaiEvaluationSubmissionTest extends TestCase
 
     private function fixture(): array
     {
-        $user = User::factory()->create(['role' => 'respondent']);
+        $user = $this->createRespondent('owner');
         $experiment = Experiment::create([
             'user_id' => $user->id,
             'status' => 'completed',
@@ -105,6 +105,18 @@ class XaiEvaluationSubmissionTest extends TestCase
         ]);
 
         return [$user, $experiment, $recommendation];
+    }
+
+    private function createRespondent(string $suffix): User
+    {
+        return User::create([
+            'name' => 'XAI Respondent '.ucfirst($suffix),
+            'email' => "xai-{$suffix}@example.test",
+            'password' => 'secret-password',
+            'role' => 'respondent',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ]);
     }
 
     private function validPayload(): array
