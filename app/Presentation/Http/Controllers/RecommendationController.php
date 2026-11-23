@@ -49,6 +49,10 @@ class RecommendationController extends Controller
                 ->where('recommendation_id', $recommendation->id)
                 ->first()
             : null;
+        $canEvaluateXai = $recommendation
+            && $recommendation->predicted_at
+            && $recommendation->algorithm === 'xgboost'
+            && ! str_starts_with((string) $recommendation->model_version, 'fallback-');
 
         return view('recommendation.show', [
             'recommendation' => $recommendation,
@@ -56,6 +60,7 @@ class RecommendationController extends Controller
             'preferenceExperiment' => $preference?->experiment,
             'finalPreferences' => $preference?->final_config ?? [],
             'xaiEvaluation' => $xaiEvaluation,
+            'canEvaluateXai' => $canEvaluateXai,
             'xaiItems' => config('xai_evaluation.items'),
             'xaiScale' => config('xai_evaluation.scale'),
         ]);
@@ -78,7 +83,12 @@ class RecommendationController extends Controller
             ->latest('predicted_at')
             ->firstOrFail();
 
-        abort_if(str_starts_with((string) $recommendation->model_version, 'fallback-'), 422, 'Evaluasi hanya dapat dikirim setelah rekomendasi AI tersedia.');
+        abort_if(
+            $recommendation->algorithm !== 'xgboost'
+                || str_starts_with((string) $recommendation->model_version, 'fallback-'),
+            422,
+            'Evaluasi hanya dapat dikirim setelah rekomendasi XGBoost tersedia.',
+        );
 
         $existing = XaiEvaluation::query()->where('recommendation_id', $recommendation->id)->first();
         $attributes = $request->validated() + [

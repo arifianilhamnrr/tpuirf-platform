@@ -112,7 +112,7 @@
             </div>
         @endif
 
-        @if($recommendation && !$usingFallback)
+        @if($canEvaluateXai)
             <section id="evaluasi-xai" class="scroll-mt-24 backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 sm:p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
                 <div class="max-w-3xl">
                     <p class="text-xs font-semibold uppercase tracking-[.18em] text-indigo-600 dark:text-indigo-400">Evaluasi Akhir</p>

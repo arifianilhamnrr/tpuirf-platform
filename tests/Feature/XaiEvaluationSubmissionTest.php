@@ -69,6 +69,22 @@ class XaiEvaluationSubmissionTest extends TestCase
         $this->assertDatabaseMissing('xai_evaluations', ['user_id' => $owner->id]);
     }
 
+    public function test_legacy_non_xgboost_recommendation_cannot_be_evaluated(): void
+    {
+        [$user, , $recommendation] = $this->fixture();
+        $recommendation->update([
+            'algorithm' => 'random_forest+xgboost',
+            'model_version' => 'rf+xgboost+shap-multitarget-v3',
+        ]);
+        $session = ['user_id' => $user->id, 'user_role' => 'respondent', 'user_name' => $user->name];
+
+        $this->withSession($session)
+            ->postJson(route('respondent.recommendation.xai-evaluation.store'), $this->validPayload())
+            ->assertUnprocessable();
+
+        $this->assertDatabaseCount('xai_evaluations', 0);
+    }
+
     public function test_resubmission_updates_same_row(): void
     {
         [$user] = $this->fixture();
