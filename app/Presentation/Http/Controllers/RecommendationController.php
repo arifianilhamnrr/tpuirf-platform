@@ -50,9 +50,9 @@ class RecommendationController extends Controller
                 ->first()
             : null;
         $canEvaluateXai = $recommendation
-            && $recommendation->predicted_at
+            && $recommendation->predictedAt
             && $recommendation->algorithm === 'xgboost'
-            && ! str_starts_with((string) $recommendation->model_version, 'fallback-');
+            && ! str_starts_with((string) $recommendation->modelVersion, 'fallback-');
 
         return view('recommendation.show', [
             'recommendation' => $recommendation,
