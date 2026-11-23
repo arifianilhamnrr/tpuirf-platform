@@ -20,6 +20,7 @@ services:
       - CACHE_STORE=database
       - ML_SERVICE_URL=http://ml:5000
       - GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxLB-B-iW1Wlri4imCrGQrEEO99XAAsX2ye2d061uSWAvtiCPDZQ1-LgI6QT0xsZiks/exec
+      - GOOGLE_SHEETS_XAI_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxCep5cKbGO0FeLhKwSONoNXXbl-FwRbVlPikW4Hiw4mnWNR2sLAlKtDKN6EGMsYa1v/exec
     volumes:
       - tpuirf_storage:/var/www/html/storage
       - tpuirf_db:/var/www/html/database/data
@@ -40,7 +41,7 @@ services:
     image: cloudflare/cloudflared:latest
     container_name: tpuirf_tunnel
     restart: unless-stopped
-    command: tunnel --no-autoupdate run
+    command: tunnel --protocol http2 --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
     depends_on:
