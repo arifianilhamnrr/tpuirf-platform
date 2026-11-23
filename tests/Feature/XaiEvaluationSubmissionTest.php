@@ -57,6 +57,7 @@ class XaiEvaluationSubmissionTest extends TestCase
     {
         [$owner] = $this->fixture();
         $intruder = $this->createRespondent('intruder');
+        $intruder->profile()->create($this->completeProfileData());
 
         $this->withSession([
             'user_id' => $intruder->id,
@@ -83,20 +84,6 @@ class XaiEvaluationSubmissionTest extends TestCase
     private function fixture(): array
     {
         $user = $this->createRespondent('owner');
-        $user->profile()->create([
-            'age' => 25,
-            'gender' => 'male',
-            'education' => 'bachelor',
-            'occupation' => 'Mahasiswa',
-            'digital_literacy' => 4,
-            'device_type' => 'smartphone',
-            'visual_preference' => 'modern',
-            'context_environment' => 'school',
-            'ai_familiarity' => 3,
-            'daily_device_usage' => '3_5',
-            'device_usage_time' => 'evening',
-            'primary_device_purpose' => 'productivity',
-        ]);
         $experiment = Experiment::create([
             'user_id' => $user->id,
             'status' => 'completed',
@@ -117,8 +104,27 @@ class XaiEvaluationSubmissionTest extends TestCase
             'algorithm' => 'xgboost',
             'predicted_at' => now(),
         ]);
+        $user->profile()->create($this->completeProfileData());
 
         return [$user, $experiment, $recommendation];
+    }
+
+    private function completeProfileData(): array
+    {
+        return [
+            'age' => 25,
+            'gender' => 'male',
+            'education' => 'bachelor',
+            'occupation' => 'Mahasiswa',
+            'digital_literacy' => 4,
+            'device_type' => 'smartphone',
+            'visual_preference' => 'modern',
+            'context_environment' => 'school',
+            'ai_familiarity' => 3,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'evening',
+            'primary_device_purpose' => 'productivity',
+        ];
     }
 
     private function createRespondent(string $suffix): User
