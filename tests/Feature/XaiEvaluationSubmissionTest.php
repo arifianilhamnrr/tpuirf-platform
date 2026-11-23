@@ -83,6 +83,20 @@ class XaiEvaluationSubmissionTest extends TestCase
     private function fixture(): array
     {
         $user = $this->createRespondent('owner');
+        $user->profile()->create([
+            'age' => 25,
+            'gender' => 'male',
+            'education' => 'bachelor',
+            'occupation' => 'Mahasiswa',
+            'digital_literacy' => 4,
+            'device_type' => 'smartphone',
+            'visual_preference' => 'modern',
+            'context_environment' => 'school',
+            'ai_familiarity' => 3,
+            'daily_device_usage' => '3_5',
+            'device_usage_time' => 'evening',
+            'primary_device_purpose' => 'productivity',
+        ]);
         $experiment = Experiment::create([
             'user_id' => $user->id,
             'status' => 'completed',
