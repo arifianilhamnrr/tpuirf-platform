@@ -21,7 +21,7 @@ fi
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-if ! grep -q "^APP_KEY=base64:" /var/www/html/.env; then
+if [ -z "${APP_KEY:-}" ] && ! grep -q "^APP_KEY=base64:" /var/www/html/.env; then
     php /var/www/html/artisan key:generate --force
 fi
 
