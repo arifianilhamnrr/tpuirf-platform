@@ -7,11 +7,13 @@ fi
 
 mkdir -p /var/www/html/database/data
 
+database_created=0
 if [ ! -f /var/www/html/database/data/database.sqlite ]; then
     if [ -f /var/www/html/database/database.sqlite ]; then
         cp /var/www/html/database/database.sqlite /var/www/html/database/data/database.sqlite
     else
         touch /var/www/html/database/data/database.sqlite
+        database_created=1
     fi
     chown www-data:www-data /var/www/html/database/data/database.sqlite
 fi
@@ -24,7 +26,9 @@ if ! grep -q "^APP_KEY=base64:" /var/www/html/.env; then
 fi
 
 php /var/www/html/artisan migrate --force
-php /var/www/html/artisan db:seed --force || true
+if [ "$database_created" -eq 1 ]; then
+    php /var/www/html/artisan db:seed --force
+fi
 php /var/www/html/artisan config:cache
 php /var/www/html/artisan route:cache
 php /var/www/html/artisan view:cache
