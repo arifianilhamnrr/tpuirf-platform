@@ -96,6 +96,31 @@ class DummyResearchDataSeeder extends Seeder
                 'theme' => 'dark', 'color_palette' => 'orange', 'font_family' => 'sans', 'font_size' => 'small',
                 'layout_density' => 'compact', 'navigation_position' => 'left', 'icon_style' => 'duotone', 'design_styles' => ['high_contrast_brutalist'],
             ],
+            [
+                'name' => 'Raka Maulana', 'gender' => 'male', 'age' => 23,
+                'education' => 'bachelor', 'occupation' => 'Mahasiswa', 'digital_literacy' => 4,
+                'device_type' => 'smartphone', 'visual_preference' => 'simple', 'context_environment' => 'school',
+                'ai_familiarity' => 3, 'daily_device_usage' => '3_5', 'device_usage_time' => 'evening', 'primary_device_purpose' => 'education',
+                'theme' => 'light', 'color_palette' => 'green', 'font_family' => 'sans', 'font_size' => 'large',
+                'layout_density' => 'spacious', 'navigation_position' => 'bottom', 'icon_style' => 'filled', 'design_styles' => ['material_elevated'],
+            ],
+            [
+                'name' => 'Maya Kurnia', 'gender' => 'female', 'age' => 25,
+                'education' => 'bachelor', 'occupation' => 'Content Creator', 'digital_literacy' => 4,
+                'device_type' => 'tablet', 'visual_preference' => 'soft', 'context_environment' => 'home',
+                'ai_familiarity' => 3, 'daily_device_usage' => '3_5', 'device_usage_time' => 'evening', 'primary_device_purpose' => 'entertainment',
+                'theme' => 'dark', 'color_palette' => 'rose', 'font_family' => 'sans', 'font_size' => 'medium',
+                'layout_density' => 'comfortable', 'navigation_position' => 'bottom', 'icon_style' => 'filled', 'design_styles' => ['neumorphism'],
+            ],
+            [
+                'name' => 'Kevin Wijaya', 'gender' => 'male', 'age' => 27,
+                'education' => 'master', 'occupation' => 'Product Designer', 'digital_literacy' => 5,
+                'device_type' => 'desktop', 'visual_preference' => 'experimental', 'context_environment' => 'office',
+                'ai_familiarity' => 5, 'daily_device_usage' => '6_plus', 'device_usage_time' => 'afternoon', 'primary_device_purpose' => 'design',
+                'theme' => 'dark', 'color_palette' => 'blue', 'font_family' => 'high_legibility', 'font_size' => 'medium',
+                'layout_density' => 'compact', 'navigation_position' => 'left', 'icon_style' => 'duotone',
+                'design_styles' => ['neumorphism', 'high_contrast_brutalist', 'material_elevated', 'minimal_flat', 'glassmorphism'],
+            ],
         ];
 
         foreach ($dummyProfiles as $idx => $d) {
@@ -217,23 +242,27 @@ class DummyResearchDataSeeder extends Seeder
 
             // Seed sample interaction events
             for ($ev = 1; $ev <= 8; $ev++) {
-                InteractionEvent::create([
-                    'event_uuid' => (string) Str::uuid(),
-                    'user_id' => $user->id,
-                    'experiment_id' => $experiment->id,
-                    'protocol_version' => config('experiment.protocol_version', 'TPUIRF-PREF-v4'),
-                    'task_key' => 'design_style',
-                    'sequence_number' => $ev,
-                    'event_type' => $ev % 2 === 0 ? 'component_clicked' : 'component_hovered',
-                    'component_id' => 'btn-style-' . ($ev % 3),
-                    'option_id' => $d['design_styles'][0],
-                    'client_timestamp' => now()->toISOString(),
-                    'server_received_at' => now(),
-                    'elapsed_task_ms' => $ev * 1200,
-                    'elapsed_experiment_ms' => $ev * 3000,
-                    'input_method' => 'pointer',
-                    'payload' => ['x' => rand(100, 800), 'y' => rand(100, 600)],
-                ]);
+                InteractionEvent::updateOrCreate(
+                    [
+                        'experiment_id' => $experiment->id,
+                        'task_key' => 'design_style',
+                        'sequence_number' => $ev,
+                    ],
+                    [
+                        'event_uuid' => (string) Str::uuid(),
+                        'user_id' => $user->id,
+                        'protocol_version' => config('experiment.protocol_version', 'TPUIRF-PREF-v4'),
+                        'event_type' => $ev % 2 === 0 ? 'component_clicked' : 'component_hovered',
+                        'component_id' => 'btn-style-' . ($ev % 3),
+                        'option_id' => $d['design_styles'][0],
+                        'client_timestamp' => now()->toISOString(),
+                        'server_received_at' => now(),
+                        'elapsed_task_ms' => $ev * 1200,
+                        'elapsed_experiment_ms' => $ev * 3000,
+                        'input_method' => 'pointer',
+                        'payload' => ['x' => rand(100, 800), 'y' => rand(100, 600)],
+                    ],
+                );
             }
         }
     }
