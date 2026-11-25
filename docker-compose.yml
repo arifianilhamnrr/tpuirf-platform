@@ -15,9 +15,13 @@ services:
       - APP_URL=https://tpuirf.projectar.web.id
       - DB_CONNECTION=sqlite
       - DB_DATABASE=/var/www/html/database/data/database.sqlite
-      - SESSION_DRIVER=database
+      - DB_BUSY_TIMEOUT=15000
+      - DB_JOURNAL_MODE=WAL
+      - DB_SYNCHRONOUS=NORMAL
+      - DB_TRANSACTION_MODE=IMMEDIATE
+      - SESSION_DRIVER=file
       - QUEUE_CONNECTION=database
-      - CACHE_STORE=database
+      - CACHE_STORE=file
       - ML_SERVICE_URL=http://ml:5000
       - GOOGLE_SHEETS_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxLB-B-iW1Wlri4imCrGQrEEO99XAAsX2ye2d061uSWAvtiCPDZQ1-LgI6QT0xsZiks/exec
       - GOOGLE_SHEETS_XAI_WEBHOOK_URL=https://script.google.com/macros/s/AKfycbxCep5cKbGO0FeLhKwSONoNXXbl-FwRbVlPikW4Hiw4mnWNR2sLAlKtDKN6EGMsYa1v/exec
