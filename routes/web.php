@@ -27,11 +27,11 @@ Route::middleware(['auth.session'])->group(function () {
     Route::middleware([RespondentMiddleware::class])->prefix('respondent')->name('respondent.')->group(function () {
         Route::middleware('profile.complete')->prefix('preference-experiment')->name('preference-experiment.')->group(function () {
             Route::get('/', [PreferenceExperimentPageController::class, 'introduction'])->name('introduction');
-            Route::post('/start', [PreferenceExperimentController::class, 'start'])->middleware('throttle:10,1')->name('start');
+            Route::post('/start', [PreferenceExperimentController::class, 'start'])->middleware('throttle:survey-start')->name('start');
             Route::get('/{experimentId}/tasks/{taskKey}/page', [PreferenceExperimentPageController::class, 'task'])->name('tasks.page');
             Route::get('/{experimentId}/tasks/{taskKey}', [PreferenceExperimentController::class, 'task'])->name('tasks.show');
-            Route::post('/{experimentId}/tasks/{taskKey}/selection', [PreferenceExperimentController::class, 'select'])->middleware('throttle:60,1')->name('tasks.select');
-            Route::post('/{experimentId}/events/batch', [PreferenceExperimentController::class, 'events'])->middleware('throttle:120,1')->name('events.batch');
+            Route::post('/{experimentId}/tasks/{taskKey}/selection', [PreferenceExperimentController::class, 'select'])->middleware('throttle:survey-selection')->name('tasks.select');
+            Route::post('/{experimentId}/events/batch', [PreferenceExperimentController::class, 'events'])->middleware('throttle:survey-events')->name('events.batch');
             Route::get('/{experimentId}/evaluation', [PreferenceExperimentPageController::class, 'evaluation'])->name('evaluation.page');
             Route::post('/{experimentId}/evaluation', [PreferenceExperimentController::class, 'evaluate'])->name('evaluation');
             Route::get('/{experimentId}/complete', [PreferenceExperimentPageController::class, 'complete'])->name('complete.page');
@@ -54,7 +54,7 @@ Route::middleware(['auth.session'])->group(function () {
             Route::get('/recommendation', [RecommendationController::class, 'show'])->name('recommendation.show');
             Route::post('/recommendation/generate', [RecommendationController::class, 'generate'])->name('recommendation.generate');
             Route::post('/recommendation/xai-evaluation', [RecommendationController::class, 'storeXaiEvaluation'])
-                ->middleware('throttle:10,1')
+                ->middleware('throttle:survey-xai-evaluation')
                 ->name('recommendation.xai-evaluation.store');
         });
     });

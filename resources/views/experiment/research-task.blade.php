@@ -592,6 +592,7 @@ function researchPreferenceTask(config) {
         scrollSession: null,
         scrollTimer: null,
         flushTimer: null,
+        flushPromise: null,
         themeTransition: null,
         themeFallbackTimer: null,
         themePointer: null,
@@ -910,7 +911,18 @@ function researchPreferenceTask(config) {
         },
 
         async flushEvents(keepalive = false) {
+            if (this.flushPromise) return this.flushPromise;
             if (!this.queue.length) return true;
+
+            this.flushPromise = this.sendEventBatch(keepalive);
+            try {
+                return await this.flushPromise;
+            } finally {
+                this.flushPromise = null;
+            }
+        },
+
+        async sendEventBatch(keepalive = false) {
             const batch = this.queue.slice(0, 100);
             try {
                 const response = await fetch(this.eventsUrl, {
