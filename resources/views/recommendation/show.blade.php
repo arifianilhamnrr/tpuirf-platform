@@ -21,12 +21,14 @@
         $recommendedConfig = $recommendation?->recommendedConfig ?? [];
         $usingFallback = str_starts_with($recommendation?->modelVersion ?? '', 'fallback-');
     @endphp
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="mx-auto max-w-7xl space-y-6">
         <div class="text-center">
             <h1 class="text-3xl font-bold text-gray-800 dark:text-white">Rekomendasi Antarmuka Untuk Anda</h1>
             <p class="text-gray-500 dark:text-gray-400 mt-2">Tampilan ini dirancang khusus menyesuaikan profil, kebiasaan, dan cara Anda berinteraksi selama sesi uji coba.</p>
         </div>
 
+        <div data-testid="recommendation-evaluation-layout" class="{{ $canEvaluateXai ? 'grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:items-start' : 'space-y-6' }}">
+            <div data-testid="recommendation-evidence-column" class="space-y-6">
         <div class="backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
             @if($recommendation && !empty($recommendedConfig))
                 <div class="flex flex-col sm:flex-row sm:items-center gap-5">
@@ -112,9 +114,19 @@
             </div>
         @endif
 
+        @if(!$recommendation)
+            <form method="POST" action="{{ route('respondent.recommendation.generate') }}" class="text-center">
+                @csrf
+                <button type="submit" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold hover:from-indigo-700 hover:to-cyan-600 transition-all duration-200 shadow-lg shadow-indigo-500/25">
+                    Buat Rekomendasi
+                </button>
+            </form>
+        @endif
+            </div>
+
         @if($canEvaluateXai)
-            <section id="evaluasi-xai" class="scroll-mt-24 backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 sm:p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
-                <div class="max-w-3xl">
+            <section id="evaluasi-xai" data-testid="recommendation-evaluation-column" class="scroll-mt-24 backdrop-blur-xl bg-white/70 dark:bg-gray-800/50 rounded-3xl p-6 sm:p-8 border border-white/20 dark:border-gray-700/30 shadow-xl">
+                <div>
                     <p class="text-xs font-semibold uppercase tracking-[.18em] text-indigo-600 dark:text-indigo-400">Evaluasi Akhir</p>
                     <h2 class="mt-2 text-2xl font-bold text-gray-800 dark:text-white">Evaluasi Rekomendasi dan Penjelasan AI</h2>
                     <p class="mt-2 text-sm leading-6 text-gray-600 dark:text-gray-300">Setelah melihat rekomendasi dan analisis faktor di atas, berikan penilaian Anda pada setiap pernyataan berikut. Pilih satu jawaban dari 1 (Sangat Tidak Setuju) sampai 5 (Sangat Setuju).</p>
@@ -136,9 +148,9 @@
                             <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-5">
                                 @foreach($xaiScale as $score => $label)
                                     @php $selected = (int) old($key, $xaiEvaluation?->{$key}) === (int) $score; @endphp
-                                    <label class="flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition {{ $selected ? 'border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'border-gray-200 bg-white/70 text-gray-600 hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300' }}">
+                                    <label class="flex min-h-12 min-w-0 cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition sm:flex-col sm:justify-start sm:gap-2 sm:px-2 sm:text-center {{ $selected ? 'border-indigo-500 bg-indigo-500/10 text-indigo-700 dark:text-indigo-300' : 'border-gray-200 bg-white/70 text-gray-600 hover:border-indigo-300 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300' }}">
                                         <input type="radio" name="{{ $key }}" value="{{ $score }}" class="h-5 w-5 shrink-0 text-indigo-600 focus:ring-indigo-500" {{ $selected ? 'checked' : '' }} required>
-                                        <span><strong>{{ $score }}</strong><span class="block text-xs leading-4">{{ $label }}</span></span>
+                                        <span class="min-w-0"><strong>{{ $score }}</strong><span class="block break-words text-xs leading-4">{{ $label }}</span></span>
                                     </label>
                                 @endforeach
                             </div>
@@ -154,14 +166,6 @@
                 </form>
             </section>
         @endif
-
-        @if(!$recommendation)
-            <form method="POST" action="{{ route('respondent.recommendation.generate') }}" class="text-center">
-                @csrf
-                <button type="submit" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 text-white font-semibold hover:from-indigo-700 hover:to-cyan-600 transition-all duration-200 shadow-lg shadow-indigo-500/25">
-                    Buat Rekomendasi
-                </button>
-            </form>
-        @endif
+        </div>
     </div>
 @endsection

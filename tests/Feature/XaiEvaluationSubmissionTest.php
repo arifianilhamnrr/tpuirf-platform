@@ -41,6 +41,40 @@ class XaiEvaluationSubmissionTest extends TestCase
         Queue::assertNotPushed(RetrainRecommendationModelJob::class);
     }
 
+    public function test_recommendation_page_exposes_responsive_result_and_evaluation_regions(): void
+    {
+        [$user] = $this->fixture();
+        $session = ['user_id' => $user->id, 'user_role' => 'respondent', 'user_name' => $user->name];
+
+        $response = $this->withSession($session)->get(route('respondent.recommendation.show'));
+
+        $response->assertOk()
+            ->assertSee('data-testid="recommendation-evaluation-layout"', false)
+            ->assertSee('data-testid="recommendation-evidence-column"', false)
+            ->assertSee('data-testid="recommendation-evaluation-column"', false)
+            ->assertSee('class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] xl:items-start"', false)
+            ->assertSee('id="evaluasi-xai"', false)
+            ->assertSee('action="'.route('respondent.recommendation.xai-evaluation.store').'"', false);
+
+        foreach (array_keys(config('xai_evaluation.items')) as $itemKey) {
+            $response->assertSee('name="'.$itemKey.'"', false);
+        }
+
+        $document = new \DOMDocument();
+        @$document->loadHTML($response->getContent());
+        $xpath = new \DOMXPath($document);
+        $left = $xpath->query('//*[@data-testid="recommendation-evidence-column"]')->item(0);
+        $right = $xpath->query('//*[@data-testid="recommendation-evaluation-column"]')->item(0);
+
+        $this->assertNotNull($left);
+        $this->assertNotNull($right);
+        $this->assertStringContainsString('Konfigurasi Pilihan Sistem (AI)', $left->textContent);
+        $this->assertStringContainsString('Mengapa Tampilan Ini Direkomendasikan?', $left->textContent);
+        $this->assertStringNotContainsString('Evaluasi Rekomendasi dan Penjelasan AI', $left->textContent);
+        $this->assertStringContainsString('Evaluasi Rekomendasi dan Penjelasan AI', $right->textContent);
+        $this->assertSame(count(config('xai_evaluation.items')), $xpath->query('.//fieldset', $right)->length);
+    }
+
     public function test_all_items_are_required_integers_between_one_and_five(): void
     {
         [$user] = $this->fixture();
@@ -136,7 +170,15 @@ class XaiEvaluationSubmissionTest extends TestCase
             'confidence_score' => .8,
             'shap_values' => [.5],
             'features' => ['age'],
-            'explanations' => [['feature' => 'age']],
+            'explanations' => [[
+                'feature' => 'Usia',
+                'target_label' => 'Tema',
+                'recommended_value_label' => 'Mode Gelap',
+                'shap_value' => .5,
+                'impact' => .5,
+                'direction' => 'increases',
+                'human_readable' => 'Rentang usia Anda mendukung rekomendasi tema ini.',
+            ]],
             'input_features' => ['age' => 25],
             'model_version' => 'xgb-v4-test',
             'algorithm' => 'xgboost',
